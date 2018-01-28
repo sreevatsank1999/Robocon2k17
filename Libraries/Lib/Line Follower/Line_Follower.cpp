@@ -73,41 +73,51 @@ public:
 	}
 };
 
-class CytronLineFollower {
+class Cytron {
 	const unsigned char ValPin;
 	const unsigned char JnPin;
 
 	const float l;					//Module Total length in any Units
 public:
-	unsigned int Val;
+	unsigned int LinePos;
+
+	const float InpMax;
+
 	unsigned int JnCount;
 	bool is_Jn;
 
-	CytronLineFollower(const unsigned char AnalogPin, const unsigned char JunctionPin, const float len) 
-		:ValPin(AnalogPin), JnPin(JunctionPin), l(len)
+	Cytron(const unsigned char AnalogPin, const unsigned char JunctionPin, const float MaxInp, const float len) 
+		:ValPin(AnalogPin), JnPin(JunctionPin), InpMax(MaxInp), l(len)
 	{
 		JnCount = 0;
 	}
 
 	void Update() {
-		Val = analogRead(ValPin);
+		LinePos = analogRead(ValPin);
 		is_Jn = digitalRead(JnPin);
 
 		JnCount += is_Jn;
 	}
 
 	float PID_Inp() {
-		return Val;
+		return LinePos;
+	}
+
+	float Real_dist() {									// returns in Untis of float l;
+		return (LinePos / InpMax)*l;			
 	}
 };
 
 class Polulo : public QTRSensorsRC {
 
+	const float l;
+
 public:
 	unsigned int LinePos;
 	const float InpMax;
 
-	Polulo(QTRSensorsRC &qtrrc, const float MaxInp) : QTRSensorsRC(qtrrc), InpMax(MaxInp) {}
+	Polulo(QTRSensorsRC &qtrrc, const float MaxInp, const float len) : QTRSensorsRC(qtrrc), InpMax(MaxInp), l(len)
+	{}
 
 	void Initialise() {
 
@@ -133,5 +143,9 @@ public:
 
 	float PID_Inp() {
 		return LinePos;
+	}
+
+	float Real_dist() {									// returns in Untis of float l;
+		return (LinePos / InpMax)*l;
 	}
 };
