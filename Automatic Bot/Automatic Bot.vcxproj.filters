@@ -13,29 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Base_Drive_cpp">
-      <UniqueIdentifier>{431929fb-407d-4cd4-97cb-38e903f158d4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Base_Drive_cpp\Base_Drive_cpp.ino">
-      <Filter>Base_Drive_cpp</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Libraries\Lib\Joystick\Joystick_ver_Arduino\Joystick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\Lib\DC_Motor\DC_Motor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Libraries\Lib\PID\PID.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Libraries\Lib\Line Follower\Line_Follower.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <None Include="Base_Drive_cpp\Base_Drive_cpp.ino" />
   </ItemGroup>
 </Project>

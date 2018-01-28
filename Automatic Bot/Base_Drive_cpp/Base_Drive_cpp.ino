@@ -1,8 +1,8 @@
-#include "DC_Motor.h"
-#include "Joystick.h"
-#include "PID.cpp"
-#include "Line_Follower.cpp"
-#include <QTRSensors.h>
+#include "../../Libraries/Lib/DC_Motor/DC_Motor.h"
+#include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
+#include "../../Libraries/Lib/PID/PID.cpp"
+#include "../../Libraries/Lib/Line Follower/Line_Follower.cpp"
+#include "../../Libraries/Lib/QTRSensors/QTRSensors.h"
 
 class Polulo{
 

@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Base_Drive_cpp\Base_Drive_cpp.ino" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DDEBE38-6CA2-4BC7-A99B-58D5EDFBCCE7}</ProjectGuid>
     <RootNamespace>AutomaticBot</RootNamespace>
@@ -109,17 +112,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="Base_Drive_cpp\Base_Drive_cpp.ino" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Libraries\Lib\DC_Motor\DC_Motor.h" />
-    <ClInclude Include="..\Libraries\Lib\Joystick\Joystick_ver_Arduino\Joystick.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Libraries\Lib\Line Follower\Line_Follower.cpp" />
-    <ClCompile Include="..\Libraries\Lib\PID\PID.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
