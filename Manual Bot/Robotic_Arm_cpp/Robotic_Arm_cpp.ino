@@ -11,7 +11,7 @@ class MyServo : public SoftwareServo {
   }
 };
 
-class Robotic_Arm{
+class Robotic_Arm {
 
   Joystick &Jrw;                    //For Planar Motion
   Joystick &Jo;                     //For Inclination
@@ -36,7 +36,7 @@ class Robotic_Arm{
   Robotic_Arm(Joystick &rw, Joystick &o, MyServo arrS[5], const float Limb1, const float Limb2, const float Limb3)
             : Jrw(rw), Jo(o),
               S_Base(arrS[0]), S_01(arrS[1]), S_02(arrS[2]), S_03(arrS[3]), S_Grip(arrS[4]),
-              r1(Limb1), r2(Limb2}, r3(Limb3)
+              r1(Limb1), r2(Limb), r3(Limb3)
         {  }
 
   void Initialize(){
