@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "../QTRSensors/QTRSensors.h"
 
 class IR {
 protected:
@@ -76,12 +77,14 @@ class CytronLineFollower {
 	const unsigned char ValPin;
 	const unsigned char JnPin;
 
+	const float l;					//Module Total length in any Units
 public:
 	unsigned int Val;
 	unsigned int JnCount;
 	bool is_Jn;
 
-	CytronLineFollower(const unsigned char AnalogPin, const unsigned char JunctionPin) :ValPin(AnalogPin), JnPin(JunctionPin)
+	CytronLineFollower(const unsigned char AnalogPin, const unsigned char JunctionPin, const float len) 
+		:ValPin(AnalogPin), JnPin(JunctionPin), l(len)
 	{
 		JnCount = 0;
 	}
@@ -95,5 +98,40 @@ public:
 
 	float PID_Inp() {
 		return Val;
+	}
+};
+
+class Polulo : public QTRSensorsRC {
+
+public:
+	unsigned int LinePos;
+	const float InpMax;
+
+	Polulo(QTRSensorsRC &qtrrc, const float MaxInp) : QTRSensorsRC(qtrrc), InpMax(MaxInp) {}
+
+	void Initialise() {
+
+		delay(500);
+		pinMode(13, OUTPUT);
+		digitalWrite(13, HIGH);    // turn on Arduino's LED to indicate we are in calibration mode
+		for (int i = 0; i < 400; i++)  // make the calibration take about 10 seconds
+		{
+			(*this).calibrate(QTR_EMITTERS_ON);       // reads all sensors 10 times at 2500 us per read (i.e. ~25 ms per call)
+		}
+		digitalWrite(13, LOW);     // turn off Arduino's LED to indicate we are through with calibration
+
+		delay(1000);
+	}
+
+	void Update() {
+
+		unsigned int sensorValues[8];
+
+		LinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
+		//   Serial.println(LinePos);
+	}
+
+	float PID_Inp() {
+		return LinePos;
 	}
 };
