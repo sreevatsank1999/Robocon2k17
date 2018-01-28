@@ -16,5 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Base_Drive_cpp\Base_Drive_cpp.ino" />
+    <None Include="QuadBase_Drive_cpp\QuadBase_Drive_cpp.ino" />
   </ItemGroup>
 </Project>
