@@ -1,5 +1,5 @@
 ﻿#include <Arduino.h>
-#include "Joystick.h"
+#include "../Joystick/Joystick_ver_Arduino/Joystick.h"
 
 template <class Object>
 class Joystick_PID : public Joystick{
