@@ -39,6 +39,9 @@
     <ClCompile Include="Lib\SoftwareServo\SoftwareServo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Lib\QTRSensors\QTRSensors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lib\DC_Motor\DC_Motor.h">
@@ -57,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Lib\SoftwareServo\SoftwareServo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\QTRSensors\QTRSensors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -240,3 +240,8 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/Libraries/Lib/QTRSensors/examples
+/Libraries/Lib/QTRSensors/README.md
+/Libraries/Lib/QTRSensors/LICENSE.txt
+/Libraries/Lib/QTRSensors/library.properties
+/Libraries/Lib/QTRSensors/keywords.txt
