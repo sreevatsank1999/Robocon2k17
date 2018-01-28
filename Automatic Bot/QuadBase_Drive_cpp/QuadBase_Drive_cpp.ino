@@ -2,50 +2,24 @@
 #include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
 #include "../../Libraries/Lib/PID/PID.cpp"
 #include "../../Libraries/Lib/Line Follower/Line_Follower.cpp"
-#include "../../Libraries/Lib/QTRSensors/QTRSensors.h"
 
-class Polulo{
+class DualLineSensor{
 
-  QTRSensorsRC &QTRRC;
-public:
-  unsigned int LinePos;
-  float InpMax;
+	CytronLineFollower &Cytron_5k;
+	Polulo			 &Polulo_QTRRC;
 
-  Polulo(QTRSensorsRC &qtrrc) : QTRRC(qtrrc)
-  {}
-  
-  void Initialise(){
-        
-  delay(500);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);    // turn on Arduino's LED to indicate we are in calibration mode
-  for (int i = 0; i < 400; i++)  // make the calibration take about 10 seconds
-  {
-    QTRRC.calibrate(QTR_EMITTERS_ON);       // reads all sensors 10 times at 2500 us per read (i.e. ~25 ms per call)
-  }
-  digitalWrite(13, LOW);     // turn off Arduino's LED to indicate we are through with calibration
-    
-    InpMax = 3500;
-    delay(1000);
-  }
-  
-  void Update(){
+	const float r;
 
-    unsigned int sensorValues[8]; 
-    
-    LinePos = QTRRC.readLine(sensorValues, QTR_EMITTERS_ON, 0);
- //   Serial.println(LinePos);
-  }
-  float PID_Inp(){
-    return LinePos;
-  }
-};
+public: 
+	float tani;
+	const float InpMax;
 
-class DualLineFollower{
+	DualLineSensor(CytronLineFollower &cytron, Polulo &polulo, const float dist) : Cytron_5k(cytron), Polulo_QTRRC(polulo), r(dist)
+	{}
 
-  void Initialise(){
-    
-  }
+	int Update() {
+		tani;
+	}
 };
 
 class QuadBaseDrive{            // C++ Square Base Drive Class
@@ -167,33 +141,29 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
     
 };
 
-//Joystick_Analog Jxy(A0, A1, 50, 50);
-//Joystick_Analog Jw(A5, -1, 50);
-
 DC_Motor Motor_arr[4] = {DC_Motor(5, 28), DC_Motor(2,22), DC_Motor(3,24), DC_Motor(4,26,150,20)};
 
-//const unsigned char IRPins[8] = {2,3,4,5,6,7,8,9};
-//IRArrayDig IRArray(IRPins);
-
 CytronLineFollower LineFollower_5k(A0, 10);
-
 Joystick_PID<CytronLineFollower> PID_5k_Jxy(LineFollower_5k, 350, 1.71,0,0);
 
-QTRSensorsRC qtr((unsigned char[]){37,39,41,43,45,47,49,51},8, 2500, 53);
-Polulo Polulo_QTRRC(qtr); 
+Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 7000/2);
 Joystick_PID<Polulo> PID_Polulo_Jxy(Polulo_QTRRC, 3500, 1.71,0,0);
 
 //QuadBaseDrive QuadBase(PID_Polulo_Jxy, PID_5k_Jxy, Motor_arr, 150);
 QuadBaseDrive QuadBase_Polulo(PID_Polulo_Jxy, PID_5k_Jxy, Motor_arr, 150);
 QuadBaseDrive QuadBase_Cytron(PID_5k_Jxy, PID_Polulo_Jxy, Motor_arr, 150);
+
 void setup() {
   
  Serial.begin(57600);
- LineFollower_5k.Initialise();
+
+ //LineFollower_5k.Initialise();
  PID_5k_Jxy.Initialise();
+
 // QuadBase.Initialise();
 QuadBase_Polulo.Initialise();
 QuadBase_Cytron.Initialise();
+
   Polulo_QTRRC.Initialise();
   PID_Polulo_Jxy.Initialise();
 
@@ -203,24 +173,22 @@ void loop() {
  
 
 //  QuadBase.Read_Drive();
- // Drive(Vr1, -Vr2, -Vr3, Vr4);
+ 
 // PID_5k_Jxy.Update();
 // PID_5k_Jxy.Joystick_Debug();
-//Serial.println(LineFollower_5k.Val);
 
-//IRArray.Update();
-//IRArray.Debug();
+//Serial.println(LineFollower_5k.Val);
 
 //  PID_Polulo_Jxy.Update();
 //  PID_Polulo_Jxy.Joystick_Debug();
 
-//Serial.print(PID_Polulo_Jxy.K); Serial.print(", "); Serial.print(PID_Polulo_Jxy.CosO); Serial.print(", ");Serial.print(PID_Polulo_Jxy.SinO); Serial.println(", ");
-
+/*
 QuadBase_Cytron.Read_Drive();
   delay(20);
   
 QuadBase_Polulo.Read_Drive();
   delay(20);
+*/
 }
 
 /*
