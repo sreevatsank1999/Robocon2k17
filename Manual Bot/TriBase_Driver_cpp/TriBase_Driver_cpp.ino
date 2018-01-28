@@ -109,7 +109,7 @@ class TriBaseDrive {                  // C++ Trianglar Base Drive Class
     }
 };
 
-class Joystick_PS2 : public Joystick {
+class Joystick_PS2 : public Joystick_Analog {
   
    PS2X &PS2_Ctrl;
 
@@ -118,7 +118,7 @@ class Joystick_PS2 : public Joystick {
    
 public:  
     Joystick_PS2(PS2X &PS2Controller, const int clk, const int cmd, const int att, const int dat, bool pressures, bool rumble, bool LR) 
-    : Joystick(LR?PSS_LX:PSS_RX, LR?PSS_LY:PSS_RY, 50, 50, 128, 128), PS2_Ctrl(PS2Controller),
+    : Joystick_Analog(LR?PSS_LX:PSS_RX, LR?PSS_LY:PSS_RY, 50, 50, 128, 128), PS2_Ctrl(PS2Controller),
       CLK(clk), CMD(cmd), ATT(att), DAT(dat), Pressure(pressures), Rumble(rumble)
     {
       //  PS2_Ctrl.config_gamepad(clk, cmd, att, dat, pressures, rumble);
@@ -130,7 +130,7 @@ public:
     }
     void Initialise(){
       Config(CLK, CMD, ATT, DAT, Pressure, Rumble);
-      Joystick::Initialise();
+      Joystick_Analog::Initialise();
     }
 private:
    void Config(const int clk, const int cmd, const int att, const int dat, bool pressures, bool rumble){
