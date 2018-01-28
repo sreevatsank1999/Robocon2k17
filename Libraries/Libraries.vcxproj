@@ -110,27 +110,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Libraries\DC_Motor\DC_Motor.cpp" />
-    <ClCompile Include="Libraries\Joystick\Joystick.cpp" />
-    <ClCompile Include="Libraries\Joystick\Joystick_ver_Arduino\Joystick.cpp" />
-    <ClCompile Include="Libraries\Line Follower\Line_Follower.cpp" />
-    <ClCompile Include="Libraries\PID\PID.cpp" />
-    <ClCompile Include="Libraries\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_lib.cpp" />
-    <ClCompile Include="Libraries\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\PS2X_lib.cpp" />
-    <ClCompile Include="Libraries\SoftwareServo\SoftwareServo.cpp" />
+    <ClCompile Include="Lib\DC_Motor\DC_Motor.cpp" />
+    <ClCompile Include="Lib\Joystick\Joystick.cpp" />
+    <ClCompile Include="Lib\Joystick\Joystick_ver_Arduino\Joystick.cpp" />
+    <ClCompile Include="Lib\Line Follower\Line_Follower.cpp" />
+    <ClCompile Include="Lib\PID\PID.cpp" />
+    <ClCompile Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_lib.cpp" />
+    <ClCompile Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\PS2X_lib.cpp" />
+    <ClCompile Include="Lib\SoftwareServo\SoftwareServo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Libraries\DC_Motor\DC_Motor.h" />
-    <ClInclude Include="Libraries\Joystick\Joystick.h" />
-    <ClInclude Include="Libraries\Joystick\Joystick_ver_Arduino\Joystick.h" />
-    <ClInclude Include="Libraries\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_lib.h" />
-    <ClInclude Include="Libraries\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\PS2X_lib.h" />
-    <ClInclude Include="Libraries\SoftwareServo\SoftwareServo.h" />
+    <ClInclude Include="Lib\DC_Motor\DC_Motor.h" />
+    <ClInclude Include="Lib\Joystick\Joystick.h" />
+    <ClInclude Include="Lib\Joystick\Joystick_ver_Arduino\Joystick.h" />
+    <ClInclude Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_lib.h" />
+    <ClInclude Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\PS2X_lib.h" />
+    <ClInclude Include="Lib\SoftwareServo\SoftwareServo.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Libraries\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2XMouse\PS2XMouse.ino" />
-    <None Include="Libraries\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_Example.ino" />
-    <None Include="Libraries\PS2X-Arduino-Complete-Odin\PS2XDpadLED_OdinExample\PS2XDpadLED_OdinExample.ino" />
+    <None Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2XMouse\PS2XMouse.ino" />
+    <None Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_Example.ino" />
+    <None Include="Lib\PS2X-Arduino-Complete-Odin\PS2XDpadLED_OdinExample\PS2XDpadLED_OdinExample.ino" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
