@@ -1,5 +1,5 @@
-#include"Joystick.h"
-#include"SoftwareServo.h"
+#include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
+#include "../../Libraries/Lib/SoftwareServo/SoftwareServo.h"
 
 class MyServo : public SoftwareServo {
   const unsigned char PinNo;

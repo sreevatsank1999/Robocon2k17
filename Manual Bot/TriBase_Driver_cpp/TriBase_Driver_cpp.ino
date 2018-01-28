@@ -1,6 +1,6 @@
-#include "Joystick.h"
-#include "DC_Motor.h"
-#include "PS2X_lib.h"
+#include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
+#include "../../Libraries/Lib/DC_Motor/DC_Motor.h"
+#include "../../Libraries/Lib/PS2X_lib/PS2X_lib.h"
 
 class TriBaseDrive {                  // C++ Trianglar Base Drive Class
 
