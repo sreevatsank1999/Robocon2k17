@@ -26,10 +26,14 @@ int Joystick::Joystick_Get(float &Extrn_K, float &Extrn_CosO, float &Extrn_SinO)
 }
 
 int Joystick::Joystick_Debug() {
-	float Extrn_K, Extrn_CosO, Extrn_SinO;
+	Debug_Dev();
+	Serial.println("");
 
-	Joystick_Get(Extrn_K, Extrn_CosO, Extrn_SinO);
-	Serial.print(Extrn_K); Serial.print(", "); Serial.print(Extrn_CosO); Serial.print(", "); Serial.print(Extrn_SinO);
+	return 0;
+}
+int Joystick::Debug_Dev() {
+
+	Serial.print(K); Serial.print(", "); Serial.print(CosO); Serial.print(", "); Serial.print(SinO);
 
 	return 0;
 }
@@ -68,10 +72,16 @@ int Joystick_Analog::Update() {
 }
 
 int Joystick_Analog::Joystick_Debug() {
-	float Extrn_K, Extrn_CosO, Extrn_SinO;
+	Debug_Dev();
+	Serial.println("");
 
-	Joystick_Get(Extrn_K, Extrn_CosO, Extrn_SinO);
-	Serial.print(JVal_X); Serial.print(", "); Serial.print(JVal_Y); Serial.print(", "); Serial.print(A); Serial.print("   "); Joystick::Joystick_Debug(); Serial.println("");
+	return 0;
+}
+
+int Joystick_Analog::Debug_Dev() {
+
+
+	Serial.print(JVal_X); Serial.print(", "); Serial.print(JVal_Y); Serial.print(", "); Serial.print(A); Serial.print("   "); Joystick::Debug_Dev(); Serial.println("");
 	//   Serial.print(Jx);Serial.print(", ");Serial.print(Jy);Serial.println("  ");
 	//   Serial.print(OffstX);Serial.print(", ");Serial.print(OffstY);Serial.print(", ");Serial.print(ThrshldX);Serial.print(", ");Serial.println(ThrshldY);
 	//   Serial.print(AMax_X);Serial.print(", ");Serial.print(AMax_Y);Serial.println("  ");  
