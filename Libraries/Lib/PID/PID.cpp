@@ -54,17 +54,24 @@ public:
 	}
 
 	int Joystick_Debug() {
-
-		Serial.print(Prop_Val); Serial.print(", "); Serial.print(Diff_Val); Serial.print(", "); Serial.println(Intg_Val); Serial.print(", "); Serial.println(Zero_Val);
-		Serial.print("      ");
-
-		Joystick::Joystick_Debug();
+		
+		Debug_Dev();
 		Serial.println("");
 
 		return 0;
 	}
 
 private:
+	int Debug_Dev() {
+
+		Serial.print(Prop_Val); Serial.print(", "); Serial.print(Diff_Val); Serial.print(", "); Serial.print(Intg_Val); Serial.print(", "); Serial.print(Zero_Val);
+		Serial.print("      ");
+
+		Joystick::Debug_Dev();
+
+		return 0;
+	}
+
   int Set_K() {
     K = 0.707;
     return 0;
