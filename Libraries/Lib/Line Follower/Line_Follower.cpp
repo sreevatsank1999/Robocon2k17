@@ -106,11 +106,21 @@ public:
 	float Real_dist() {									// returns in Untis of float l;
 		return (LinePos / InpMax)*l;			
 	}
+
+	void Debug() {
+		Debug_Dev();
+		Serial.println("");
+	}
+protected:
+	void Debug_Dev() {
+		Serial.print(LinePos); Serial.print(", "); Serial.print(InpMax); Serial.print(", "); Serial.print(JnCount); Serial.print(", "); Serial.print(is_Jn);
+	}
 };
 
 class Polulo : public QTRSensorsRC {
 
 	const float l;
+	unsigned int sensorValues[8];
 
 public:
 	unsigned int LinePos;
@@ -134,9 +144,6 @@ public:
 	}
 
 	void Update() {
-
-		unsigned int sensorValues[8];
-
 		LinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
 		//   Serial.println(LinePos);
 	}
@@ -147,5 +154,20 @@ public:
 
 	float Real_dist() {									// returns in Untis of float l;
 		return (LinePos / InpMax)*l;
+	}
+
+	void Debug() {
+		Debug_Dev();
+		Serial.println("");
+	}
+protected:
+	void Debug_Dev() {
+		
+		for (unsigned char i = 0; i < 8; i++)
+		{
+			Serial.print(sensorValues[i]);
+			Serial.print('\t');
+		}
+		Serial.println(LinePos);
 	}
 };
