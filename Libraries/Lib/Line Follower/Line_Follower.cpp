@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "../QTRSensors/QTRSensors.h"
 
 class IR {
 protected:
@@ -72,28 +73,101 @@ public:
 	}
 };
 
-class CytronLineFollower {
+class Cytron {
 	const unsigned char ValPin;
 	const unsigned char JnPin;
 
+	const float l;					//Module Total length in any Units
 public:
-	unsigned int Val;
+	unsigned int LinePos;
+
+	const float InpMax;
+
 	unsigned int JnCount;
 	bool is_Jn;
 
-	CytronLineFollower(const unsigned char AnalogPin, const unsigned char JunctionPin) :ValPin(AnalogPin), JnPin(JunctionPin)
+	Cytron(const unsigned char AnalogPin, const unsigned char JunctionPin, const float MaxInp, const float len) 
+		:ValPin(AnalogPin), JnPin(JunctionPin), InpMax(MaxInp), l(len)
 	{
 		JnCount = 0;
 	}
 
 	void Update() {
-		Val = analogRead(ValPin);
+		LinePos = analogRead(ValPin);
 		is_Jn = digitalRead(JnPin);
 
 		JnCount += is_Jn;
 	}
 
 	float PID_Inp() {
-		return Val;
+		return LinePos;
+	}
+
+	float Real_dist() {									// returns in Untis of float l;
+		return (LinePos / InpMax)*l;			
+	}
+
+	void Debug() {
+		Debug_Dev();
+		Serial.println("");
+	}
+protected:
+	void Debug_Dev() {
+		Serial.print(LinePos); Serial.print(", "); Serial.print(InpMax); Serial.print(", "); Serial.print(JnCount); Serial.print(", "); Serial.print(is_Jn);
+	}
+};
+
+class Polulo : public QTRSensorsRC {
+
+	const float l;
+	unsigned int sensorValues[8];
+
+public:
+	unsigned int LinePos;
+	const float InpMax;
+
+	Polulo(QTRSensorsRC &qtrrc, const float MaxInp, const float len) : QTRSensorsRC(qtrrc), InpMax(MaxInp), l(len)
+	{}
+
+	void Initialise() {
+
+		delay(500);
+		pinMode(13, OUTPUT);
+		digitalWrite(13, HIGH);    // turn on Arduino's LED to indicate we are in calibration mode
+		for (int i = 0; i < 400; i++)  // make the calibration take about 10 seconds
+		{
+			(*this).calibrate(QTR_EMITTERS_ON);       // reads all sensors 10 times at 2500 us per read (i.e. ~25 ms per call)
+		}
+		digitalWrite(13, LOW);     // turn off Arduino's LED to indicate we are through with calibration
+
+		delay(1000);
+	}
+
+	void Update() {
+		LinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
+		//   Serial.println(LinePos);
+	}
+
+	float PID_Inp() {
+		return LinePos;
+	}
+
+	float Real_dist() {									// returns in Untis of float l;
+		return (LinePos / InpMax)*l;
+	}
+
+	void Debug() {
+		Debug_Dev();
+		Serial.println("");
+	}
+protected:
+	void Debug_Dev() {
+		
+		for (unsigned char i = 0; i < 8; i++)
+		{
+			Serial.print(sensorValues[i]);
+			Serial.print('\t');
+		}
+		Serial.println(LinePos);
 	}
 };

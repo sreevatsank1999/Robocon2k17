@@ -18,6 +18,8 @@ public:
 	virtual int Update();
 
 	virtual int Joystick_Debug();
+protected:
+	int Debug_Dev();
 };
 
 class Joystick_Analog : public Joystick {
@@ -40,6 +42,8 @@ public:
 	virtual int Joystick_Debug();
 
 protected:
+	int Debug_Dev();
+
 	bool Read();
 	virtual void RawRead(int &X, int &Y);
 	virtual float Max_Amp();

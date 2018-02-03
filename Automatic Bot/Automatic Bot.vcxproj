@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Base_Drive_cpp\Base_Drive_cpp.ino" />
+    <None Include="QuadBase_Drive_cpp\QuadBase_Drive_cpp.ino" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DDEBE38-6CA2-4BC7-A99B-58D5EDFBCCE7}</ProjectGuid>
