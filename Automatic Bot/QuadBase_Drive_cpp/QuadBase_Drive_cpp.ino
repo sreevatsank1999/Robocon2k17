@@ -5,20 +5,23 @@
 
 class DualLineSensor{
 
-	CytronLineFollower &Cytron_5k;
-	Polulo			 &Polulo_QTRRC;
+	Cytron &Cytron_5k;
+	Polulo &Polulo_QTRRC;
 
-	const float r;
+	const float dist;
 
 public: 
 	float tani;
 	const float InpMax;
 
-	DualLineSensor(CytronLineFollower &cytron, Polulo &polulo, const float dist) : Cytron_5k(cytron), Polulo_QTRRC(polulo), r(dist)
+	DualLineSensor(Cytron &cytron, Polulo &polulo, const float MaxInp, const float Dist) : Cytron_5k(cytron), Polulo_QTRRC(polulo), InpMax(MaxInp), dist(Dist)
 	{}
 
 	int Update() {
-		tani;
+		tani = (Cytron_5k.Real_dist() - Polulo_QTRRC.Real_dist()) / dist;
+	}
+	float PID_Inp() {
+		return tani;
 	}
 };
 
@@ -141,12 +144,30 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
     
 };
 
+/*
+class Joystick_custom : public Joystick {
+
+	void Set_K_CosO_SinO(float Extrn_K, float Extrn_CosO, float Extrn_SinO) {
+		K = Extrn_K;
+		CosO = Extrn_CosO;
+		SinO = Extrn_SinO;
+	}
+	
+	int Update() {
+
+		Set_K_CosO_SinO()
+
+		return 0;
+	}
+};
+*/
+
 DC_Motor Motor_arr[4] = {DC_Motor(5, 28), DC_Motor(2,22), DC_Motor(3,24), DC_Motor(4,26,150,20)};
 
-CytronLineFollower LineFollower_5k(A0, 10);
-Joystick_PID<CytronLineFollower> PID_5k_Jxy(LineFollower_5k, 350, 1.71,0,0);
+Cytron LineFollower_5k(A0, 10, 350, 10.0);
+Joystick_PID<Cytron> PID_5k_Jxy(LineFollower_5k, 350, 1.71,0,0);
 
-Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 7000/2);
+Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 7000/2, 5.0);
 Joystick_PID<Polulo> PID_Polulo_Jxy(Polulo_QTRRC, 3500, 1.71,0,0);
 
 //QuadBaseDrive QuadBase(PID_Polulo_Jxy, PID_5k_Jxy, Motor_arr, 150);
@@ -179,8 +200,8 @@ void loop() {
 
 //Serial.println(LineFollower_5k.Val);
 
-//  PID_Polulo_Jxy.Update();
-//  PID_Polulo_Jxy.Joystick_Debug();
+  PID_Polulo_Jxy.Update();
+  PID_Polulo_Jxy.Joystick_Debug();
 
 /*
 QuadBase_Cytron.Read_Drive();
