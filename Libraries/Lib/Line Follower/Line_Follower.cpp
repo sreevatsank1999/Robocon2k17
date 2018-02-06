@@ -93,10 +93,14 @@ public:
 	}
 
 	void Update() {
-		LinePos = analogRead(ValPin);
-		is_Jn = digitalRead(JnPin);
+		int newLinePos = analogRead(ValPin);
+		int newis_Jn = digitalRead(JnPin);
 
-		JnCount += is_Jn;
+		if ((newLinePos == InpMax)&&(LinePos < 0.15*InpMax))	 LinePos = 0;				// 15% of InpMax ;
+		else												 LinePos = newLinePos;
+		
+		if ((is_Jn == false) && (newis_Jn == true))			 JnCount += 1;
+		else												 JnCount += 0;
 	}
 
 	float PID_Inp() {
@@ -144,8 +148,11 @@ public:
 	}
 
 	void Update() {
-		LinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
-		//   Serial.println(LinePos);
+		int newLinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
+		
+		if ((newLinePos == InpMax) && (LinePos < 0.15*InpMax))	 LinePos = 0;				// 15% of InpMax ;
+		else													 LinePos = newLinePos;
+
 	}
 
 	float PID_Inp() {
@@ -166,7 +173,7 @@ protected:
 		for (unsigned char i = 0; i < 8; i++)
 		{
 			Serial.print(sensorValues[i]);
-			Serial.print('\t');
+			Serial.print("  ");
 		}
 		Serial.println(LinePos);
 	}

@@ -24,10 +24,10 @@ public:
     Diff_Val = 0.0;
   }
 	void Initialise() {
-		Start(PID_Obj.PID_Inp());
+		Start(PID_Obj.PID_Inp() - Zero_Val);
 	}
-	void Start(float InpVal) {
-		Prop_Val = InpVal;
+	void Start(float PVal) {
+		Prop_Val = PVal;
 		now_Prev = millis();
 	}
 
@@ -38,14 +38,14 @@ public:
 
 		return Update(Prop_Val);
 	}
-	int Update(float InpVal) {
+	int Update(float PVal) {
 		unsigned long now = millis();
 
-		return Update(InpVal, now - now_Prev);
+		return Update(PVal, now - now_Prev);
 	}
-	int Update(float InpVal, float del_t) {
+	int Update(float PVal, float del_t) {
 
-		P_CosSin(InpVal, CosO, SinO);
+		P_CosSin(PVal, CosO, SinO);
 	    Set_K();
 
 		now_Prev = millis();
@@ -76,14 +76,14 @@ private:
     K = 0.707;
     return 0;
   }
-	int P_CosSin(float InpVal, float &Cosa, float &Sina) {
+	int P_CosSin(float PVal, float &Cosa, float &Sina) {
 		
 		const float ThrshldCos = 0.005;
 		const float ThrshldSin = 0.005;
 		const float j = 0.98;
 
-		float Yr = -pow((InpVal / (j*PID_Obj.InpMax)), 3);
-//Serial.print(InpVal); Serial.print(", "); Serial.print(PID_Obj.InpMax); Serial.print(", "); Serial.println(Yr);
+		float Yr = -pow((PVal / j*(PID_Obj.InpMax - Zero_Val)), 3);
+//Serial.print(PVal); Serial.print(", "); Serial.print(PID_Obj.InpMax - Zero_Val); Serial.print(", "); Serial.println(Yr);
 		Sina = Kp*Yr / sqrt(sq(Kp*Yr) + (float)1);
 		Cosa = (float)1 / sqrt(sq(Kp*Yr) + (float)1);
 
@@ -94,15 +94,15 @@ private:
 
 		return 0;
 	}
-	int Differentiation(float InpVal, float del_t) {
+	int Differentiation(float PVal, float del_t) {
 		
 		
 		
 		return 0;
 	}
-	int Integration(float InpVal, float del_t) {
+	int Integration(float PVal, float del_t) {
 		
-		Intg_Val += (InpVal - Zero_Val )*del_t;
+		Intg_Val += (PVal - Zero_Val )*del_t;
 		return Intg_Val;
 	}
 };
