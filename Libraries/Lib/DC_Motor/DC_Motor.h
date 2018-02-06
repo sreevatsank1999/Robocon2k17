@@ -37,7 +37,7 @@ public:
 };
 
 template<class MotorClass>
-class MotorAssmbly : public MotorClass : public Wheel {
+class MotorAssmbly : public MotorClass, public Wheel {
 public:
 	const float Vmax;					// Real World Velocity Max(in Units)
 
