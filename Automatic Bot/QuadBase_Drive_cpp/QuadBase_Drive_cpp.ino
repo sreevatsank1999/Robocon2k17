@@ -65,8 +65,14 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 	inline float Get_V() {								// RealWorld V
 		return abs(Jxy.K*V_limit_k)*(1 - abs(Jw.K*W_limit_k))*Vmax;
 	}
+	inline float Get_Vmax() {							// RealWorld Vmax
+		return Vmax*V_limit_k;
+	}
 	inline float Get_W() {								// RealWorld W
 		return abs(Jw.K*W_limit_k)*Wmax;
+	}
+	inline float Get_Wmax() {							// RealWorld Wmax
+		return Wmax*W_limit_k;
 	}
 
 	int Read_Update() {
