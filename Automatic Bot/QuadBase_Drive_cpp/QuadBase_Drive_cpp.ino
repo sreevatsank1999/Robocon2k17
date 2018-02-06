@@ -27,28 +27,33 @@ public:
 
 class QuadBaseDrive{            // C++ Square Base Drive Class
 
-    Joystick &Jxy;
-    Joystick &Jw;
+    Joystick &Jxy, &Jw;
     
-    DC_Motor &M1;
-    DC_Motor &M2;
-    DC_Motor &M3;
-    DC_Motor &M4;
+    MotorAssmbly<DC_Motor> M1, M2, M3, M4;
 
-    int pwm_Max;
+	const float r;	// Distance of Center Of Mass to Motors //TODO : Set Wmax, V_RealWrold Function , W_RealWorld Function And then PIDD
+
+	const float Vmax, V_limit_k;		// Limit the Max Speed of configuration by a V_limit_k% of Vmax, Vmax depends on the Motors' Vmax
+	const float Wmax, W_limit_k;
+
 
   public:
-      QuadBaseDrive(Joystick &xy, Joystick &w, DC_Motor Motor[4], const int Max_pwm = 220)
+      QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float Vk_Limit = 1.0, const float Wk_Limit = 1.0)
       : Jxy(xy), Jw(w),
-        M1(Motor[0]), M2(Motor[1]), M3(Motor[2]), M4(Motor[3])
-      {
-        M1.pwm_Max_Set(Max_pwm);
-        M2.pwm_Max_Set(Max_pwm);
-        M3.pwm_Max_Set(Max_pwm);
-        M4.pwm_Max_Set(Max_pwm);
+        M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
+		 r(R),
+		  Vmax(Vmax_clac()), V_limit_k(Vk_Limit),
+		  Wmax(Wmax_calc()), W_limit_k(Wk_Limit)
+		  {}
 
-        pwm_Max = Max_pwm;
-      }
+	  QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit = 1.0)
+		  : Jxy(xy), Jw(w),
+		  M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
+		  r(R),
+		  Vmax(Vmax_clac()), V_limit_k(k_Limit),
+		  Wmax(Wmax_calc()), W_limit_k(k_Limit)
+	  {}
+
 
     void Initialise(){
       M1.Initialise();
@@ -57,91 +62,64 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
       M4.Initialise();
     }
 
-      int Read_Drive(){                                     // Realtime Read and Drive Function with default pwm_Max
-      return Read_Drive(pwm_Max);
-    }
-    int Read_Drive(const int Max_pwm) {                    // Realtime Read and Drive Function
+	inline float Get_V() {								// RealWorld V
+		return abs(Jxy.K*V_limit_k)*(1 - abs(Jw.K*W_limit_k))*Vmax;
+	}
+	inline float Get_W() {								// RealWorld W
+		return abs(Jw.K*W_limit_k)*Wmax;
+	}
 
-      Linear_Drive(Max_pwm);
-      delay(25);
+	int Read_Update() {
+		
+		Jxy.Update();
+		Jw.Update();
+		Vr_Update(Jxy.K, Jw.K, Jxy.CosO, Jxy.SinO, M1.Vr, M2.Vr, M3.Vr, M4.Vr);
 
- //     Rotate_Drive(Max_pwm);
- //     delay(25);
-
-      return 0;
-    }
-
-    int Linear_Drive(){                                    // Realtime Read and Drive Function with default pwm_Max
-      return   Linear_Drive(pwm_Max);
-    }
-    int Linear_Drive(const int Max_pwm) {                 // Realtime Read and Drive Function
-
-      Jxy.Update();
-      Linear_Set(Jxy.K, Jxy.CosO, Jxy.SinO, M1.Vr, M2.Vr, M3.Vr, M4.Vr);
-      Drive(Max_pwm);
-
-      return 0;
+		return 0;
+	}
+    int Read_Drive() {                    // Realtime Read and Drive Function
+		Read_Update();
+		Drive();
     }
 
-    int Rotate_Drive(){                                 // Realtime Read and Drive Function with default pwm_Max
-      return Rotate_Drive(pwm_Max);
-    }
-    int Rotate_Drive(const int Max_pwm) {                     // Realtime Read and Drive Function
+   int Vr_Update(float K, float Wr, float CosO, float SinO, float &Vr1, float &Vr2, float &Vr3, float &Vr4) {      // Sets last used Value
+																						
+	// Vri => Vi/Vm, Vm - Max Motor Velocity
 
-      Jw.Update();
-      float Wr = Jw.K;
-      // Vri => Vi/Vm, Vm - Max Motor Velocity
-      Rotate_Set(Wr, M1.Vr, M2.Vr, M3.Vr, M4.Vr);
-      Drive(Max_pwm);
-
-      return 0;
-    }
-
-   int Linear_Set(float K, float CosO, float SinO, float &Vr1, float &Vr2, float &Vr3, float &Vr4) {      // Sets last used Value
-  /*    
-        Serial.print(CosO);
-        Serial.print(", ");
-        Serial.print(SinO);
-        Serial.print(", ");
-        Serial.print(K);
-        Serial.println("   ");
-      */
-
-     
-         Vr1 = K*(((float)1/sqrt(2))*CosO - ((float)1/sqrt(2))*SinO);
-         Vr2 = K*(((float)1/sqrt(2))*CosO + ((float)1/sqrt(2))*SinO);                  // ***** ERROR******
-         Vr3 = K*(((float)-1/sqrt(2))*CosO + ((float)1/sqrt(2))*SinO);    
-         Vr4 = K*(((float)-1/sqrt(2))*CosO - ((float)1/sqrt(2))*SinO);      
+         Vr1 = abs(K*V_limit_k)*(1 - abs(Wr*W_limit_k))*(((float)1/sqrt(2))*CosO - ((float)1/sqrt(2))*SinO) - Wr*W_limit_k;
+         Vr2 = abs(K*V_limit_k)*(1 - abs(Wr*W_limit_k))*(((float)1/sqrt(2))*CosO + ((float)1/sqrt(2))*SinO) - Wr*W_limit_k;
+         Vr3 = abs(K*V_limit_k)*(1 - abs(Wr*W_limit_k))*(((float)-1/sqrt(2))*CosO + ((float)1/sqrt(2))*SinO) - Wr*W_limit_k;
+         Vr4 = abs(K*V_limit_k)*(1 - abs(Wr*W_limit_k))*(((float)-1/sqrt(2))*CosO - ((float)1/sqrt(2))*SinO) - Wr*W_limit_k;
     
-/*
-        Serial.print(Vr1);
-        Serial.print(", ");
-        Serial.print(Vr2);
-        Serial.print(", ");
-        Serial.print(Vr3);
-        Serial.print(", ");
-        Serial.print(Vr4);
-        Serial.println("   ");
-*/
-      return 0;
-    }
-    int Rotate_Set(float Wr, float &Vr1, float &Vr2, float &Vr3, float &Vr4) {                             // Sets last used Value
-
-      Vr1 = Vr2 = Vr3 = Vr4 = Wr;
-
-      return 0;
+	   return 0;
     }
     
-    int Drive(const int Max_pwm) {                                                            // Drives All Motors with last Set Value
+	void Debug() {
+		Debug_Dev();
+		Serial.println("");
+	}
 
-      M1.Drive(Max_pwm);
-      M2.Drive(Max_pwm);
-      M3.Drive(Max_pwm);
-      M4.Drive(Max_pwm);
+	private: 
+		int Drive() {                                                            // Drives All Motors with last Set Value
 
-      return 0;
-    }
-    
+			M1.Drive();
+			M2.Drive();
+			M3.Drive();
+			M4.Drive();
+
+			return 0;
+		}
+
+	inline float Vmax_clac() {
+			return min(M1.Vmax, M2.Vmax, M3.Vmax, M4.Vmax);
+		}
+	inline float Wmax_calc() {
+		return Vmax / r;
+	}
+
+	void Debug_Dev() {
+		Serial.print(Vr1); erial.print(", ");Serial.print(Vr2);Serial.print(", ");Serial.print(Vr3);Serial.print(", ");Serial.print(Vr4);Serial.print("   ");
+	}
 };
 
 /*
@@ -162,7 +140,7 @@ class Joystick_custom : public Joystick {
 };
 */
 
-DC_Motor Motor_arr[4] = {DC_Motor(5, 28), DC_Motor(2,22), DC_Motor(3,24), DC_Motor(4,26,150,20)};
+MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 200), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,220,20), Wheel(0.1)};
 
 Cytron LineFollower_5k(A0, 10, 350, 10.0);
 Joystick_PID<Cytron> PID_5k_Jxy(LineFollower_5k, 350, 1.71,0,0);
@@ -171,8 +149,6 @@ Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49,
 Joystick_PID<Polulo> PID_Polulo_Jxy(Polulo_QTRRC, 3500, 1.71,0,0);
 
 //QuadBaseDrive QuadBase(PID_Polulo_Jxy, PID_5k_Jxy, Motor_arr, 150);
-QuadBaseDrive QuadBase_Polulo(PID_Polulo_Jxy, PID_5k_Jxy, Motor_arr, 150);
-QuadBaseDrive QuadBase_Cytron(PID_5k_Jxy, PID_Polulo_Jxy, Motor_arr, 150);
 
 void setup() {
   
@@ -211,27 +187,3 @@ QuadBase_Polulo.Read_Drive();
   delay(20);
 */
 }
-
-/*
-int QuadBaseDrive(float K, float CosO, float SinO, float &Vr1, float &Vr2, float &Vr3, float &Vr4){
-
-  Vr1 = K*(((float)1/sqrt(2))*CosO - ((float)1/sqrt(2))*SinO);
-  Vr2 = K*(((float)1/sqrt(2))*CosO + ((float)1/sqrt(2))*SinO);    
-  Vr3 = K*(((float)-1/sqrt(2))*CosO + ((float)1/sqrt(2))*SinO);    
-  Vr4 = K*(((float)-1/sqrt(2))*CosO - ((float)1/sqrt(2))*SinO);      
-    
-   return 0;
-}
-
-int Drive(float Vr1, float Vr2, float Vr3, float Vr4){
-
-  M1.DriveMotor(Vr1);
-  M2.DriveMotor(Vr2);
-  M3.DriveMotor(Vr3);
-  M4.DriveMotor(Vr4);
-
-  return 0;
-}
-*/
-
-
