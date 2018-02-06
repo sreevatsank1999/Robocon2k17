@@ -51,7 +51,7 @@ Wheel::Wheel(const float Diameter = 0.0)
 template<class MotorClass>
 MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel)
 	:MotorClass(Motor), Wheel(wheel),
-	Vmax((Rated_RPM / 60)*PI*d)  {}
+	Vmax((rpm_limit / 60)*PI*d)  {}
 
 template<class MotorClass>
 MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V)
