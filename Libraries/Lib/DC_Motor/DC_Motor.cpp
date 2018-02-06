@@ -44,3 +44,21 @@ void DC_Motor::Drive(const float k, const float Max_rpm) {
 
 	analogWrite(M_PWM, pwm);
 }
+
+Wheel::Wheel(const float Diameter = 0.0)
+	:d(Diameter) {}
+
+template<class MotorClass>
+MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel)
+	:MotorClass(Motor), Wheel(wheel),
+	Vmax((Rated_RPM / 60)*PI*d)  {}
+
+template<class MotorClass>
+MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V)
+	:MotorClass(Motor), Wheel(wheel),
+	Vmax(Max_V) {}
+
+template<class MotorClass>
+inline float MotorAssmbly::Get_V() {
+	return Vr*Vmax;
+}
