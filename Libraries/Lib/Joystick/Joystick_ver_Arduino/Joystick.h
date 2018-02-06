@@ -52,4 +52,17 @@ protected:
 	int A_Cos_Sin();
 	int A_Cos_Sin(int X, int Y, float &Amp, float &Cosa, float &Sina);
 };
+
+template <class ParentObj>
+class Virtual_Joystick : public Joystick {
+protected:
+	const unsigned int ID;
+
+	ParentObj &Parent;
+
+public:
+	Virtual_Joystick(const unsigned int id, ParentObj &P);
+
+	virtual int Update();
+};
 #endif // !Joystick_h 
