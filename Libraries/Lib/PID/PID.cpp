@@ -3,10 +3,6 @@
 
 template <class PIDObj, class PIDVehicle>
 class Joystick_PID {
-
-	Virtual_Joystick<Joystick_PID> Jxy;
-	Virtual_Joystick<Joystick_PID> Jw;
-
 	const float Kp, Ki, Kd;
 	const float Yo;
 
@@ -18,9 +14,13 @@ class Joystick_PID {
 
 	unsigned long now_Prev;
 public:
+
+	Virtual_Joystick<Joystick_PID> Jxy;
+	Virtual_Joystick<Joystick_PID> Jw;
+
 	Joystick_PID()
 		: Jxy(0, (*this)), Jw(1, (*this)),
-		   Kp(p), Ki(i), Kd(d),
+		   Kp(0.0), Ki(0.0), Kd(0.0),
 		   Yo(0.0) {}
 
   Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d) 
