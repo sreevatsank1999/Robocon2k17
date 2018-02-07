@@ -38,21 +38,19 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 
 
   public:
-      QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float Vk_Limit = 1.0, const float Wk_Limit = 1.0)
-      : Jxy(xy), Jw(w),
-        M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
-		 r(R),
-		  Vmax(Vmax_clac()), V_limit_k(Vk_Limit),
-		  Wmax(Wmax_calc()), W_limit_k(Wk_Limit)
-		  {}
-
-	  QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit = 1.0)
+	  QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit)
 		  : Jxy(xy), Jw(w),
 		  M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
 		  r(R),
 		  Vmax(Vmax_clac()), V_limit_k(k_Limit),
-		  Wmax(Wmax_calc()), W_limit_k(k_Limit)
-	  {}
+		  Wmax(Wmax_calc()), W_limit_k(k_Limit)	{}
+
+      QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float Vk_Limit, const float Wk_Limit)
+      : Jxy(xy), Jw(w),
+        M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
+		 r(R),
+		  Vmax(Vmax_clac()), V_limit_k(Vk_Limit),
+		  Wmax(Wmax_calc()), W_limit_k(Wk_Limit){}
 
 
     void Initialise(){
@@ -128,33 +126,20 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 	}
 };
 
-/*
-class Joystick_custom : public Joystick {
+MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 220), Wheel(0.1)),
+										MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 200), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,220,20), Wheel(0.1))};
 
-	void Set_K_CosO_SinO(float Extrn_K, float Extrn_CosO, float Extrn_SinO) {
-		K = Extrn_K;
-		CosO = Extrn_CosO;
-		SinO = Extrn_SinO;
-	}
-	
-	int Update() {
+Cytron LineFollower_5k(A0, 10, 350, 0.1);
+Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron;
 
-		Set_K_CosO_SinO()
+Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 0.5);
+Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo;
 
-		return 0;
-	}
-};
-*/
+new (&PID_Polulo) Joystick_PID(Joystick_PID<Polulo, QuadBaseDrive>(Polulo_QTRRC, QuadBase_Polulo, 0.05, sqrt(3), 0.0, 0.05));
+QuadBaseDrive QuadBase_Polulo(PID_Polulo.Jxy, PID_Polulo.Jw, M_Assmbly, 1.0);
 
-MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 200), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,220,20), Wheel(0.1)};
+QuadBaseDrive QuadBase_Cytron(PID_Cytron.Jxy, PID_Cytron.Jw, M_Assmbly, 1.0);
 
-Cytron LineFollower_5k(A0, 10, 350, 10.0);
-Joystick_PID<Cytron> PID_5k_Jxy(LineFollower_5k, 350, 1.71,0,0);
-
-Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 7000/2, 5.0);
-Joystick_PID<Polulo> PID_Polulo_Jxy(Polulo_QTRRC, 3500, 1.71,0,0);
-
-//QuadBaseDrive QuadBase(PID_Polulo_Jxy, PID_5k_Jxy, Motor_arr, 150);
 
 void setup() {
   
