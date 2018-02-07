@@ -1,7 +1,7 @@
 ﻿#include <Arduino.h>
 #include "../Joystick/Joystick_ver_Arduino/Joystick.h"
 
-template <class PIDObj, class BaseDrive>
+template <class PIDObj, class PIDVehicle>
 class Joystick_PID {
 
 	Virtual_Joystick<Joystick_PID> Jxy;
@@ -11,7 +11,7 @@ class Joystick_PID {
 	const float Yo;
 
 	PIDObj &PID_Obj;
-	BaseDrive &Base;
+	PIDVehicle &Base;
 
 	float Y;
 	float Intg_Val, delY_by_delX;
@@ -23,7 +23,7 @@ public:
 		   Kp(p), Ki(i), Kd(d),
 		   Yo(0.0) {}
 
-  Joystick_PID(PIDObj &pid_Obj, BaseDrive &base_Obj, float zeroVal, float p, float i, float d) 
+  Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d) 
     : PID_Obj(pid_Obj), Base(base_Obj)
 	  Jxy(0, (*this)), Jw(1, (*this)),
       Kp(p), Ki(i), Kd(d),
@@ -120,7 +120,7 @@ private:
 		float Wmax = Base.Get_Wmax();
 
 		float Yexp = Y + (V*del_t)*prev_SinO;
-
+															// TODO: Put Threshold on V 
 		newdelY_by_delX = -(Yobs - Yexp) / (V*del_t);
 
 		Wr = Kd*(newdelY_by_delX / del_t)*(1 / Wmax);
