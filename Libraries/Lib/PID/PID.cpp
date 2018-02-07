@@ -14,7 +14,7 @@ class Joystick_PID {
 	PIDVehicle &Base;
 
 	float Y;
-	float Intg_Val, delY_by_delX;
+	float Intg_Y, delY_by_delX;
 
 	unsigned long now_Prev;
 public:
@@ -30,7 +30,7 @@ public:
         Yo(zeroVal)
   {
     Y = 0.0;
-    Intg_Val = 0.0;
+    Intg_Y = 0.0;
     delY_by_delX = 0.0;
   }
 	void Initialise() {
@@ -47,8 +47,8 @@ public:
 
 		PID_Obj.Update();
 
-		float newProp_Val = PID_Obj.PID_Inp() - Yo;
-		Update(newProp_Val);
+		float newPVal = PID_Obj.PID_Inp() - Yo;
+		Update(newPVal);
 
 		return 0;
 	}
@@ -59,11 +59,14 @@ public:
 	}
 	int Update(float newPVal, float del_t) {
 		
-		P_CosSin(newPVal, Jxy.CosO, Jxy.SinO);
-	    Set_K(Jxy.K);
+		float newIntg_Y;
+		I(newPVal, del_t, newIntg_Y);
 
 		float newdelY_by_delX;
-		D_Wr(newPVal, del_t, Jw.K, newdelY_by_delX);
+		D_Wr(newPVal, del_t, Jxy.SinO, Jw.K, newdelY_by_delX);
+
+		P_CosSin(newPVal, Jxy.CosO, Jxy.SinO);
+	    Set_K(Jxy.K);
 
 		now_Prev = micros();
 
@@ -81,11 +84,10 @@ public:
 private:
 	int Debug_Dev() {
 
-		Serial.print(Y); Serial.print(", "); Serial.print(delY_by_delX); Serial.print(", "); Serial.print(Intg_Val); Serial.print(", "); Serial.print(Yo);
+		Serial.print(Y); Serial.print(", "); Serial.print(delY_by_delX); Serial.print(", "); Serial.print(Intg_Y); Serial.print(", ");
 		Serial.print("      ");
 
 		Jxy.Debug_Dev(); Serial.print("      "); Jw.Debug_Dev();
-
 
 		return 0;
 	}
@@ -101,11 +103,9 @@ private:
 		const float j = 0.98;
 
 		float Yr = -pow((PVal / j*(PID_Obj.InpMax() - Yo)), 3);
-//Serial.print(PVal); Serial.print(", "); Serial.print(PID_Obj.InpMax() - Yo); Serial.print(", "); Serial.println(Yr);
+
 		Sina = Kp*Yr / sqrt(sq(Kp*Yr) + (float)1);
 		Cosa = (float)1 / sqrt(sq(Kp*Yr) + (float)1);
-
-//Serial.print(Cosa); Serial.print(", "); Serial.println(Sina);
 
 		if (abs(Sina) < ThrshldSin)                       Sina = 0.0;
 		if (abs(Cosa) < ThrshldCos)                       Cosa = 0.0;
@@ -120,16 +120,18 @@ private:
 		float Wmax = Base.Get_Wmax();
 
 		float Yexp = Y + (V*del_t)*prev_SinO;
-															// TODO: Put Threshold on V 
-		newdelY_by_delX = -(Yobs - Yexp) / (V*del_t);
+															
+		if (V < ThrshldV)			newdelY_by_delX = 0;
+		else						newdelY_by_delX = -(Yobs - Yexp) / (V*del_t);
 
 		Wr = Kd*(newdelY_by_delX / del_t)*(1 / Wmax);
 
 		return 0;
 	}
-	float Integration(float PVal, float del_t) {
+	int  I(float PVal, float del_t, float &newIntg_Y) {
 		
-		Intg_Val += (PVal - Yo )*del_t;
-		return Intg_Val;
+		newIntg_Y += Ki*(PVal*del_t);
+
+		return 0;
 	}
 };
