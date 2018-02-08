@@ -2,6 +2,7 @@
 #include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
 #include "../../Libraries/Lib/PID/PID.cpp"
 #include "../../Libraries/Lib/Line Follower/Line_Follower.cpp"
+#include <math.h>
 
 class DualLineSensor{
 
@@ -129,16 +130,15 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 220), Wheel(0.1)),
 										MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 200), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,220,20), Wheel(0.1))};
 
-Cytron LineFollower_5k(A0, 10, 350, 0.1);
-Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron;
+Cytron Cytron_LSA08(A0, 10, 0.1);
+Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron(Cytron_LSA08, QuadBase_Cytron, 0.05, sqrt(3), 0.0, 0.05);
 
 Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 0.5);
-Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo;
+Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(Polulo_QTRRC, QuadBase_Polulo, 0.025, sqrt(3), 0.0, 0.05);
 
-new (&PID_Polulo) Joystick_PID(Joystick_PID<Polulo, QuadBaseDrive>(Polulo_QTRRC, QuadBase_Polulo, 0.05, sqrt(3), 0.0, 0.05));
-QuadBaseDrive QuadBase_Polulo(PID_Polulo.Jxy, PID_Polulo.Jw, M_Assmbly, 1.0);
+QuadBaseDrive QuadBase_Polulo(PID_Polulo.Jxy, PID_Polulo.Jw, M_Assmbly, 0.4, 1.0);
 
-QuadBaseDrive QuadBase_Cytron(PID_Cytron.Jxy, PID_Cytron.Jw, M_Assmbly, 1.0);
+QuadBaseDrive QuadBase_Cytron(PID_Cytron.Jxy, PID_Cytron.Jw, M_Assmbly, 0.4, 1.0);
 
 
 void setup() {
@@ -146,29 +146,24 @@ void setup() {
  Serial.begin(57600);
 
  //LineFollower_5k.Initialise();
- PID_5k_Jxy.Initialise();
+ PID_Cytron.Initialise();
 
 // QuadBase.Initialise();
 QuadBase_Polulo.Initialise();
 QuadBase_Cytron.Initialise();
 
   Polulo_QTRRC.Initialise();
-  PID_Polulo_Jxy.Initialise();
+  PID_Polulo.Initialise();
 
   delay(1000);
 }
 void loop() {
  
+ PID_Cytron.Update();
+ PID_Cytron.Joystick_Debug();
 
-//  QuadBase.Read_Drive();
- 
-// PID_5k_Jxy.Update();
-// PID_5k_Jxy.Joystick_Debug();
-
-//Serial.println(LineFollower_5k.Val);
-
-  PID_Polulo_Jxy.Update();
-  PID_Polulo_Jxy.Joystick_Debug();
+  PID_Polulo.Update();
+  PID_Polulo.Joystick_Debug();
 
 /*
 QuadBase_Cytron.Read_Drive();
