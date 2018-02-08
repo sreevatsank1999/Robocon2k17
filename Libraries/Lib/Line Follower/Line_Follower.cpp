@@ -74,7 +74,7 @@ public:
 };
 
 class Cytron {
-	const unsigned char ValPin;
+	const unsigned char AnPin;
 	const unsigned char JnPin;
 
 	const float l;					//Module Total length in any Units
@@ -86,13 +86,13 @@ public:
 	bool is_Jn;
 
 	Cytron(const unsigned char AnalogPin, const unsigned char JunctionPin, const float len) 
-		:ValPin(AnalogPin), JnPin(JunctionPin), l(len)
+		:AnPin(AnalogPin), JnPin(JunctionPin), l(len)
 	{
 		JnCount = 0;
 	}
 
 	void Update() {
-		int newLinePos = analogRead(ValPin);
+		int newLinePos = analogRead(AnPin);
 		int newis_Jn = digitalRead(JnPin);
 
 		if ((newLinePos == LinePos_Max)&&(LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;

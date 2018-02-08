@@ -1,5 +1,6 @@
 ﻿#include <Arduino.h>
 #include "../Joystick/Joystick_ver_Arduino/Joystick.h"
+#include <math.h>
 
 template <class PIDObj, class PIDVehicle>
 class Joystick_PID {
@@ -40,7 +41,9 @@ public:
 		Y = PVal;
 		now_Prev = micros();
 	}
-
+	int Update() {
+		return Update(0);
+	}
 	int Update(const unsigned int J_ID) {
 
 		if (J_ID == 1)		return 1;					// Don't Update if Jw.Update() is called

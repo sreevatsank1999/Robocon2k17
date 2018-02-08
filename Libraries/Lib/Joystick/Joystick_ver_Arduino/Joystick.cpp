@@ -1,4 +1,5 @@
 #include "Joystick.h"
+#include <math.h>
 
 Joystick::Joystick() {
 	K = 0.0;

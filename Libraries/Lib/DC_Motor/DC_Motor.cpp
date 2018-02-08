@@ -1,4 +1,5 @@
 #include "DC_Motor.h"
+#include <math.h>
 
 DC_Motor::DC_Motor(const int PWM_pin, const int DIR_pin, const float rated_rpm, const float Max_rpm, const int Bias_pwm)
 	: M_PWM(PWM_pin), M_DIR(DIR_pin), Rated_RPM(rated_rpm),
