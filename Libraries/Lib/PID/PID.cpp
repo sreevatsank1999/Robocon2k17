@@ -44,9 +44,9 @@ public:
 		now_Prev = micros();
 	}
 	int Update() {
-		return Update(0);
+		return Update(Jxy);
 	}
-	int Update(Virtual_Joystick<PID> &J_caller) {
+	int Update(Virtual_Joystick<PID> &J_caller) {			// Caller Joystick Reference
 
 		if (J_caller.get_ID() == 1)		return 1;					// Don't Update if Jw.Update() is called
 
