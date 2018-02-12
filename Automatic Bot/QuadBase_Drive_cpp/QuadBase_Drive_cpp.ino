@@ -31,13 +31,13 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
     
     MotorAssmbly<DC_Motor> M1, M2, M3, M4;
 
-	const float r;	// Distance of Center Of Mass to Motors //TODO : Set Wmax, V_RealWrold Function , W_RealWorld Function And then PIDD
+	const float r;					// Distance of Center Of Mass to Motors 
 
 	const float Vmax, V_limit_k;		// Limit the Max Speed of configuration by a V_limit_k% of Vmax, Vmax depends on the Motors' Vmax
 	const float Wmax, W_limit_k;
 
 
-  public:
+  public:									// TODO: Add procedure to Manually set Vmax
 	  QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit)
 		  : Jxy(xy), Jw(w),
 		  M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
@@ -130,10 +130,10 @@ MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 3
 										MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 200), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,220,20), Wheel(0.1))};
 
 Cytron Cytron_LSA08(A0, 10, 0.1);
-Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron(Cytron_LSA08, QuadBase_Cytron, 0.05, sqrt(3), 0.0, 0.05);
+Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron(Cytron_LSA08, 0.05, sqrt(3), 0.0, 0.05);
 
 Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 0.5);
-Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(Polulo_QTRRC, QuadBase_Polulo, 0.025, sqrt(3), 0.0, 0.05);
+Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(Polulo_QTRRC, 0.025, sqrt(3), 0.0, 0.05);
 
 QuadBaseDrive QuadBase_Polulo(PID_Polulo.Jxy, PID_Polulo.Jw, M_Assmbly, 0.4, 1.0);
 
@@ -145,9 +145,11 @@ void setup() {
  Serial.begin(57600);
 
  Cytron_LSA08.Initialise();
+ PID_Cytron.attach_Vehicle(QuadBase_Cytron);
  PID_Cytron.Initialise();
 
  Polulo_QTRRC.Initialise();
+ PID_Polulo.attach_Vehicle(QuadBase_Polulo);
  PID_Polulo.Initialise();
 
 QuadBase_Polulo.Initialise();
@@ -170,4 +172,5 @@ QuadBase_Cytron.Read_Drive();
 QuadBase_Polulo.Read_Drive();
   delay(20);
 */
+  delay(250);
 }
