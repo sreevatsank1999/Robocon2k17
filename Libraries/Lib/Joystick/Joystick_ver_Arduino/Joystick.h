@@ -53,16 +53,36 @@ protected:
 	int A_Cos_Sin(int X, int Y, float &Amp, float &Cosa, float &Sina);
 };
 
+//  ** Template Section **  //
+
 template <class ParentObj>
 class Virtual_Joystick : public Joystick {
 protected:
-	const unsigned int ID;
-
-	ParentObj &Parent;
+	ParentObj *ptrParent;
+	unsigned int ID;
 
 public:
-	Virtual_Joystick(const unsigned int id, ParentObj &P);
+	Virtual_Joystick()
+		:ID(0), ptrParent(nullptr) {}
+	Virtual_Joystick(const unsigned int id, ParentObj &P) 
+		:ID(id), ptrParent(&P) {}
 
-	virtual int Update();
+	virtual int Update() {
+		(*ptrParent).Update((*this));
+		return 0;
+	}
+
+	void set_ID(unsigned int &id) {
+		ID = id;
+	}
+	inline unsigned  int get_ID() {
+		return ID;
+	}
+	void attach_Parent(ParentObj &P) {
+		ptrParent = &P;
+	}
+	void detach_Parent() {
+		ptrParent = nullptr;
+	}
 };
 #endif // !Joystick_h 
