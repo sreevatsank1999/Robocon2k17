@@ -2,7 +2,6 @@
 #include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
 #include "../../Libraries/Lib/PID/PID.cpp"
 #include "../../Libraries/Lib/Line Follower/Line_Follower.cpp"
-#include <math.h>
 
 class DualLineSensor{
 
