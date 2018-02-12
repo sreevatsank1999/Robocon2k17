@@ -2,12 +2,12 @@
 #include "../Joystick/Joystick_ver_Arduino/Joystick.h"
 
 template <class PIDObj, class PIDVehicle>
-class PID {
+class Joystick_PID {
 	const float Kp, Ki, Kd;
 	const float Yo;
 
-	PIDObj &PID_Obj;
-	PIDVehicle &Base;
+	PIDObj *ptrPID_Obj;
+	PIDVehicle *ptrBase;
 
 	float Y;
 	float Intg_Y, delY_by_delX;
@@ -15,24 +15,45 @@ class PID {
 	unsigned long now_Prev;
 public:
 
-	Virtual_Joystick<PID> &Jxy, &Jw;
-
-  PID(Virtual_Joystick<PID> &xy, Virtual_Joystick<PID> &w, PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
-    : Jxy(xy), Jw(w),
-	  PID_Obj(pid_Obj), Base(base_Obj)
+	Virtual_Joystick<Joystick_PID> Jxy, Jw;
+	
+	Joystick_PID(PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
+		: Jxy(0, (*this), Jw(1, (*this)),
+			ptrBase(&base_Obj),
+			Kp(p), Ki(i), Kd(d),
+			Yo(zeroVal)
+	{
+		Y = 0.0;
+		Intg_Y = 0.0;
+		delY_by_delX = 0.0;
+	}
+	Joystick_PID(PIDObj &pid_Obj, float zeroVal, float p, float i, float d)
+		: Jxy(0, (*this), Jw(1, (*this)),
+			ptrPID_Obj(&pid_Obj),
+			Kp(p), Ki(i), Kd(d),
+			Yo(zeroVal)
+	{
+		Y = 0.0;
+		Intg_Y = 0.0;
+		delY_by_delX = 0.0;
+	}
+  Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
+    : Jxy(0, (*this), Jw(1, (*this)),
+	  ptrPID_Obj(&pid_Obj), ptrBase(&base_Obj),
       Kp(p), Ki(i), Kd(d),
         Yo(zeroVal)
   {
-	  Jxy.attach_Parent((*this));
-	  Jxy.set_ID(0);
-
-	  Jw.attach_Parent((*this));
-	  Jw.set_ID(1);
-
     Y = 0.0;
     Intg_Y = 0.0;
     delY_by_delX = 0.0;
   }
+  void attach_Obj(PIDObj &pid_Obj) {
+	  ptrPID_Obj = &pid_Obj;
+  }
+  void attach_Vehicle(PIDVehicle &base_Obj) {
+	  ptrBase = &base_obj;
+  }
+
 	void Initialise() {
 		Start(PID_Obj.PID_Inp() - Yo);
 	}
@@ -46,7 +67,7 @@ public:
 	int Update() {
 		return Update(Jxy);
 	}
-	int Update(Virtual_Joystick<PID> &J_caller) {			// Caller Joystick Reference
+	int Update(Virtual_Joystick<Joystick_PID> &J_caller) {			// Caller Joystick Reference
 
 		if (J_caller.get_ID() == 1)		return 1;					// Don't Update if Jw.Update() is called
 
