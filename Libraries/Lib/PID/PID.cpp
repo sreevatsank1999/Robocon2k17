@@ -1,9 +1,8 @@
 ﻿#include <Arduino.h>
 #include "../Joystick/Joystick_ver_Arduino/Joystick.h"
-#include <math.h>
 
 template <class PIDObj, class PIDVehicle>
-class Joystick_PID {
+class PID {
 	const float Kp, Ki, Kd;
 	const float Yo;
 
@@ -16,20 +15,20 @@ class Joystick_PID {
 	unsigned long now_Prev;
 public:
 
-	Virtual_Joystick<Joystick_PID> Jxy;
-	Virtual_Joystick<Joystick_PID> Jw;
+	Virtual_Joystick<PID> &Jxy, &Jw;
 
-	Joystick_PID()
-		: Jxy(0, (*this)), Jw(1, (*this)),
-		   Kp(0.0), Ki(0.0), Kd(0.0),
-		   Yo(0.0) {}
-
-  Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d) 
-    : PID_Obj(pid_Obj), Base(base_Obj)
-	  Jxy(0, (*this)), Jw(1, (*this)),
+  PID(Virtual_Joystick<PID> &xy, Virtual_Joystick<PID> &w, PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
+    : Jxy(xy), Jw(w),
+	  PID_Obj(pid_Obj), Base(base_Obj)
       Kp(p), Ki(i), Kd(d),
         Yo(zeroVal)
   {
+	  Jxy.attach_Parent((*this));
+	  Jxy.set_ID(0);
+
+	  Jw.attach_Parent((*this));
+	  Jw.set_ID(1);
+
     Y = 0.0;
     Intg_Y = 0.0;
     delY_by_delX = 0.0;
@@ -39,14 +38,17 @@ public:
 	}
 	void Start(float PVal) {
 		Y = PVal;
+		Intg_Y = 0.0;
+		delY_by_delX = 0.0;
+
 		now_Prev = micros();
 	}
 	int Update() {
 		return Update(0);
 	}
-	int Update(const unsigned int J_ID) {
+	int Update(Virtual_Joystick<PID> &J_caller) {
 
-		if (J_ID == 1)		return 1;					// Don't Update if Jw.Update() is called
+		if (J_caller.get_ID() == 1)		return 1;					// Don't Update if Jw.Update() is called
 
 		PID_Obj.Update();
 
