@@ -74,37 +74,43 @@ public:
 };
 
 class Cytron {
-	const unsigned char ValPin;
+	const unsigned char AnPin;
 	const unsigned char JnPin;
 
 	const float l;					//Module Total length in any Units
+	const float LinePos_Max = 700;
 public:
 	unsigned int LinePos;
-
-	const float InpMax;
 
 	unsigned int JnCount;
 	bool is_Jn;
 
-	Cytron(const unsigned char AnalogPin, const unsigned char JunctionPin, const float MaxInp, const float len) 
-		:ValPin(AnalogPin), JnPin(JunctionPin), InpMax(MaxInp), l(len)
+	Cytron(const unsigned char AnalogPin, const unsigned char JunctionPin, const float len) 
+		:AnPin(AnalogPin), JnPin(JunctionPin), l(len)
 	{
 		JnCount = 0;
 	}
 
 	void Update() {
-		LinePos = analogRead(ValPin);
-		is_Jn = digitalRead(JnPin);
+		int newLinePos = analogRead(AnPin);
+		int newis_Jn = digitalRead(JnPin);
 
-		JnCount += is_Jn;
+		if ((newLinePos == LinePos_Max)&&(LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
+		else												 LinePos = newLinePos;
+		
+		if ((is_Jn == false) && (newis_Jn == true))			 JnCount += 1;
+		else												 JnCount += 0;
 	}
 
 	float PID_Inp() {
-		return LinePos;
+		return Real_dist();
+	}
+	float InpMax() {
+		return l;
 	}
 
 	float Real_dist() {									// returns in Untis of float l;
-		return (LinePos / InpMax)*l;			
+		return (LinePos / LinePos_Max)*l;			
 	}
 
 	void Debug() {
@@ -113,7 +119,7 @@ public:
 	}
 protected:
 	void Debug_Dev() {
-		Serial.print(LinePos); Serial.print(", "); Serial.print(InpMax); Serial.print(", "); Serial.print(JnCount); Serial.print(", "); Serial.print(is_Jn);
+		Serial.print(LinePos); Serial.print(", "); Serial.print(LinePos_Max); Serial.print(", "); Serial.print(JnCount); Serial.print(", "); Serial.print(is_Jn);
 	}
 };
 
@@ -121,12 +127,11 @@ class Polulo : public QTRSensorsRC {
 
 	const float l;
 	unsigned int sensorValues[8];
-
+	const float LinePos_Max = 7000;
 public:
 	unsigned int LinePos;
-	const float InpMax;
 
-	Polulo(QTRSensorsRC &qtrrc, const float MaxInp, const float len) : QTRSensorsRC(qtrrc), InpMax(MaxInp), l(len)
+	Polulo(QTRSensorsRC qtrrc, const float len) : QTRSensorsRC(qtrrc), l(len)
 	{}
 
 	void Initialise() {
@@ -144,16 +149,21 @@ public:
 	}
 
 	void Update() {
-		LinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
-		//   Serial.println(LinePos);
+		int newLinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
+		
+		if ((newLinePos == LinePos_Max) && (LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
+		else													 LinePos = newLinePos;
+
 	}
 
 	float PID_Inp() {
-		return LinePos;
+		return Real_dist();
 	}
-
+	float InpMax() {
+		return l;
+	}
 	float Real_dist() {									// returns in Untis of float l;
-		return (LinePos / InpMax)*l;
+		return (LinePos / LinePos_Max)*l;
 	}
 
 	void Debug() {
@@ -166,7 +176,7 @@ protected:
 		for (unsigned char i = 0; i < 8; i++)
 		{
 			Serial.print(sensorValues[i]);
-			Serial.print('\t');
+			Serial.print("  ");
 		}
 		Serial.println(LinePos);
 	}

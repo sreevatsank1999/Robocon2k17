@@ -1,54 +1,79 @@
 ﻿#include <Arduino.h>
 #include "../Joystick/Joystick_ver_Arduino/Joystick.h"
 
-template <class Object>
-class Joystick_PID : public Joystick{
-
+template <class PIDObj, class PIDVehicle>
+class PID {
 	const float Kp, Ki, Kd;
-	const float Zero_Val;
+	const float Yo;
 
-	Object &PID_Obj;
+	PIDObj &PID_Obj;
+	PIDVehicle &Base;
 
-	float Prop_Val;
-	float Intg_Val, Diff_Val;
+	float Y;
+	float Intg_Y, delY_by_delX;
 
 	unsigned long now_Prev;
 public:
-  Joystick_PID(Object &Obj, float ini_Val, float p, float i, float d) 
-    : PID_Obj(Obj),
+
+	Virtual_Joystick<PID> &Jxy, &Jw;
+
+  PID(Virtual_Joystick<PID> &xy, Virtual_Joystick<PID> &w, PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
+    : Jxy(xy), Jw(w),
+	  PID_Obj(pid_Obj), Base(base_Obj)
       Kp(p), Ki(i), Kd(d),
-        Zero_Val(ini_Val)
+        Yo(zeroVal)
   {
-    Prop_Val = 0.0;
-    Intg_Val = 0.0;
-    Diff_Val = 0.0;
+	  Jxy.attach_Parent((*this));
+	  Jxy.set_ID(0);
+
+	  Jw.attach_Parent((*this));
+	  Jw.set_ID(1);
+
+    Y = 0.0;
+    Intg_Y = 0.0;
+    delY_by_delX = 0.0;
   }
 	void Initialise() {
-		Start(PID_Obj.PID_Inp());
+		Start(PID_Obj.PID_Inp() - Yo);
 	}
-	void Start(float InpVal) {
-		Prop_Val = InpVal;
-		now_Prev = millis();
-	}
+	void Start(float PVal) {
+		Y = PVal;
+		Intg_Y = 0.0;
+		delY_by_delX = 0.0;
 
+		now_Prev = micros();
+	}
 	int Update() {
+		return Update(Jxy);
+	}
+	int Update(Virtual_Joystick<PID> &J_caller) {			// Caller Joystick Reference
+
+		if (J_caller.get_ID() == 1)		return 1;					// Don't Update if Jw.Update() is called
+
 		PID_Obj.Update();
 
-		Prop_Val = PID_Obj.PID_Inp() - Zero_Val;
+		float newPVal = PID_Obj.PID_Inp() - Yo;
+		Update(newPVal);
 
-		return Update(Prop_Val);
+		return 0;
 	}
-	int Update(float InpVal) {
-		unsigned long now = millis();
+	int Update(float newPVal) {
+		unsigned long now = micros();
 
-		return Update(InpVal, now - now_Prev);
+		return Update(newPVal, (now - now_Prev)/1000000);
 	}
-	int Update(float InpVal, float del_t) {
+	int Update(float newPVal, float del_t) {
+		
+		float newIntg_Y;
+		I(newPVal, del_t, newIntg_Y);
 
-		P_CosSin(InpVal, CosO, SinO);
-	    Set_K();
+		float newdelY_by_delX;
+		D_Wr(newPVal, del_t, Jxy.SinO, Jw.K, newdelY_by_delX);
 
-		now_Prev = millis();
+		P_CosSin(newPVal, Jxy.CosO, Jxy.SinO);
+	    Set_K(Jxy.K);
+
+		now_Prev = micros();
 
 		return true;
 	}
@@ -64,45 +89,54 @@ public:
 private:
 	int Debug_Dev() {
 
-		Serial.print(Prop_Val); Serial.print(", "); Serial.print(Diff_Val); Serial.print(", "); Serial.print(Intg_Val); Serial.print(", "); Serial.print(Zero_Val);
+		Serial.print(Y); Serial.print(", "); Serial.print(delY_by_delX); Serial.print(", "); Serial.print(Intg_Y); Serial.print(", ");
 		Serial.print("      ");
 
-		Joystick::Debug_Dev();
+		Jxy.Debug_Dev(); Serial.print("      "); Jw.Debug_Dev();
 
 		return 0;
 	}
 
-  int Set_K() {
-    K = 0.707;
+  int Set_K(float &K) {												// TODO : Make fn. for K (Variable K) 50%-120% Range
+	  K = sqrt(1/2);
     return 0;
   }
-	int P_CosSin(float InpVal, float &Cosa, float &Sina) {
+	int P_CosSin(float PVal, float &Cosa, float &Sina) {
 		
 		const float ThrshldCos = 0.005;
 		const float ThrshldSin = 0.005;
 		const float j = 0.98;
 
-		float Yr = -pow((InpVal / (j*PID_Obj.InpMax)), 3);
-//Serial.print(InpVal); Serial.print(", "); Serial.print(PID_Obj.InpMax); Serial.print(", "); Serial.println(Yr);
+		float Yr = -pow((PVal / j*(PID_Obj.InpMax() - Yo)), 3);
+
 		Sina = Kp*Yr / sqrt(sq(Kp*Yr) + (float)1);
 		Cosa = (float)1 / sqrt(sq(Kp*Yr) + (float)1);
-
-//Serial.print(Cosa); Serial.print(", "); Serial.println(Sina);
 
 		if (abs(Sina) < ThrshldSin)                       Sina = 0.0;
 		if (abs(Cosa) < ThrshldCos)                       Cosa = 0.0;
 
 		return 0;
 	}
-	int Differentiation(float InpVal, float del_t) {
+	int D_Wr(float Yobs, float del_t, float prev_SinO, float &Wr, float &newdelY_by_delX) {
+												// ** All Units in SI Units **
+		const float ThrshldV = 0.05;
 		
-		
-		
+		float V = Base.Get_V();								
+		float Wmax = Base.Get_Wmax();
+
+		float Yexp = Y + (V*del_t)*prev_SinO;
+															
+		if (V < ThrshldV)			newdelY_by_delX = 0;
+		else						newdelY_by_delX = -(Yobs - Yexp) / (V*del_t);
+
+		Wr = Kd*(newdelY_by_delX / del_t)*(1 / Wmax);
+
 		return 0;
 	}
-	int Integration(float InpVal, float del_t) {
+	int  I(float PVal, float del_t, float &newIntg_Y) {
 		
-		Intg_Val += (InpVal - Zero_Val )*del_t;
-		return Intg_Val;
+		newIntg_Y += Ki*(PVal*del_t);
+
+		return 0;
 	}
 };
