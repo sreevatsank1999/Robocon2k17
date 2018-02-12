@@ -1,5 +1,4 @@
 #include "Joystick.h"
-#include <math.h>
 
 Joystick::Joystick() {
 	K = 0.0;
@@ -179,17 +178,5 @@ int Joystick_Analog::A_Cos_Sin(int X, int Y, float &Amp, float &Cosa, float &Sin
 	Serial.print(*SinO);
 	Serial.print("   ");
 	*/
-	return 0;
-}
-
-template <class ParentObj>
-Virtual_Joystick<ParentObj>::Virtual_Joystick(const unsigned int id, ParentObj &P) 
-	:ID(id), Parent(P) {}
-
-template <class ParentObj>
-int Virtual_Joystick<ParentObj>::Update() {
-	
-	Parent.Update((*this).ID);
-
 	return 0;
 }

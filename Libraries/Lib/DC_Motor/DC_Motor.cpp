@@ -1,5 +1,4 @@
 #include "DC_Motor.h"
-#include <math.h>
 
 DC_Motor::DC_Motor(const int PWM_pin, const int DIR_pin, const float rated_rpm, const float Max_rpm, const int Bias_pwm)
 	: M_PWM(PWM_pin), M_DIR(DIR_pin), Rated_RPM(rated_rpm),
@@ -51,15 +50,10 @@ Wheel::Wheel(const float Diameter = 0.0)
 
 template<class MotorClass>
 MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel)
-	:MotorClass(Motor), Wheel(wheel),
-	Vmax((rpm_limit / 60)*PI*d)  {}
+	
 
 template<class MotorClass>
 MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V)
-	:MotorClass(Motor), Wheel(wheel),
-	Vmax(Max_V) {}
-
+	
 template<class MotorClass>
-inline float MotorAssmbly::Get_V() {
-	return Vr*Vmax;
-}
+inline float MotorAssmbly::Get_V() 

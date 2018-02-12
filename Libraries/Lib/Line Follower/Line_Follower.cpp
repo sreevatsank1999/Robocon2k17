@@ -131,7 +131,7 @@ class Polulo : public QTRSensorsRC {
 public:
 	unsigned int LinePos;
 
-	Polulo(QTRSensorsRC &qtrrc, const float len) : QTRSensorsRC(qtrrc), l(len)
+	Polulo(QTRSensorsRC qtrrc, const float len) : QTRSensorsRC(qtrrc), l(len)
 	{}
 
 	void Initialise() {

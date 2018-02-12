@@ -7,7 +7,7 @@ class DC_Motor {                      // C++ DC_Motor Class    // M(PWM_pin, DIR
 
 	const int M_PWM;
 	const int M_DIR;
-
+protected:
 	const float Rated_RPM;					// Physical RPM
 	
 	const float rpm_limit;					// Physical RPM
@@ -36,15 +36,24 @@ public:
 	Wheel(const float Diameter = 0.0);
 };
 
+//  ** Template Section **  //
+
 template<class MotorClass>
 class MotorAssmbly : public MotorClass, public Wheel {
 public:
 	const float Vmax;					// Real World Velocity Max(in Units)
 
-	MotorAssmbly(const MotorClass Motor, const Wheel wheel);
-	MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V);
+	MotorAssmbly(const MotorClass Motor, const Wheel wheel)
+		:MotorClass(Motor), Wheel(wheel),
+		 Vmax((rpm_limit / 60)*PI*d) {}
 
-	float Get_V();					// Real World Velocity(Realtime)
+	MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V)
+		:MotorClass(Motor), Wheel(wheel),
+		 Vmax(Max_V) {}
+
+	inline float Get_V() {					// Real World Velocity(Realtime)
+		return Vr*Vmax;
+	}					
 };
 
 #endif // !DC_Motor_h
