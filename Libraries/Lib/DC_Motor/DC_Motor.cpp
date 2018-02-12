@@ -15,6 +15,7 @@ DC_Motor::DC_Motor(const DC_Motor &Motor, const float Max_rpm)
 
 void DC_Motor::Initialise() {
 	pinMode(M_DIR, OUTPUT);
+	pinMode(M_PWM, OUTPUT);
 }
 
 inline float DC_Motor::Get_rpm() {
@@ -45,15 +46,5 @@ void DC_Motor::Drive(const float k, const float Max_rpm) {
 	analogWrite(M_PWM, pwm);
 }
 
-Wheel::Wheel(const float Diameter = 0.0)
+Wheel::Wheel(const float Diameter)
 	:d(Diameter) {}
-
-template<class MotorClass>
-MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel)
-	
-
-template<class MotorClass>
-MotorAssmbly::MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V)
-	
-template<class MotorClass>
-inline float MotorAssmbly::Get_V() 

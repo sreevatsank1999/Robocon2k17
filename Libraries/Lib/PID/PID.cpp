@@ -18,7 +18,7 @@ public:
 	Virtual_Joystick<Joystick_PID> Jxy, Jw;
 	
 	Joystick_PID(PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
-		: Jxy(0, (*this), Jw(1, (*this)),
+		: Jxy(0, (*this)), Jw(1, (*this)),
 			ptrBase(&base_Obj),
 			Kp(p), Ki(i), Kd(d),
 			Yo(zeroVal)
@@ -28,7 +28,7 @@ public:
 		delY_by_delX = 0.0;
 	}
 	Joystick_PID(PIDObj &pid_Obj, float zeroVal, float p, float i, float d)
-		: Jxy(0, (*this), Jw(1, (*this)),
+		: Jxy(0, (*this)), Jw(1, (*this)),
 			ptrPID_Obj(&pid_Obj),
 			Kp(p), Ki(i), Kd(d),
 			Yo(zeroVal)
@@ -38,7 +38,7 @@ public:
 		delY_by_delX = 0.0;
 	}
   Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
-    : Jxy(0, (*this), Jw(1, (*this)),
+    : Jxy(0, (*this)), Jw(1, (*this)),
 	  ptrPID_Obj(&pid_Obj), ptrBase(&base_Obj),
       Kp(p), Ki(i), Kd(d),
         Yo(zeroVal)
@@ -51,11 +51,11 @@ public:
 	  ptrPID_Obj = &pid_Obj;
   }
   void attach_Vehicle(PIDVehicle &base_Obj) {
-	  ptrBase = &base_obj;
+	  ptrBase = &base_Obj;
   }
 
 	void Initialise() {
-		Start(PID_Obj.PID_Inp() - Yo);
+		Start((*ptrPID_Obj).PID_Inp() - Yo);
 	}
 	void Start(float PVal) {
 		Y = PVal;
@@ -71,9 +71,9 @@ public:
 
 		if (J_caller.get_ID() == 1)		return 1;					// Don't Update if Jw.Update() is called
 
-		PID_Obj.Update();
+		(*ptrPID_Obj).Update();
 
-		float newPVal = PID_Obj.PID_Inp() - Yo;
+		float newPVal = (*ptrPID_Obj).PID_Inp() - Yo;
 		Update(newPVal);
 
 		return 0;
@@ -81,7 +81,7 @@ public:
 	int Update(float newPVal) {
 		unsigned long now = micros();
 
-		return Update(newPVal, (now - now_Prev)/1000000);
+		return Update(newPVal, (float)(now - now_Prev)/(float)1000000);
 	}
 	int Update(float newPVal, float del_t) {
 		
@@ -119,7 +119,7 @@ private:
 	}
 
   int Set_K(float &K) {												// TODO : Make fn. for K (Variable K) 50%-120% Range
-	  K = sqrt(1/2);
+	  K = sqrt((float)1/(float)2);
     return 0;
   }
 	int P_CosSin(float PVal, float &Cosa, float &Sina) {
@@ -128,7 +128,7 @@ private:
 		const float ThrshldSin = 0.005;
 		const float j = 0.98;
 
-		float Yr = -pow((PVal / j*(PID_Obj.InpMax() - Yo)), 3);
+		float Yr = -pow(((float)PVal / (float)(j*((*ptrPID_Obj).InpMax() - Yo))), 3);
 
 		Sina = Kp*Yr / sqrt(sq(Kp*Yr) + (float)1);
 		Cosa = (float)1 / sqrt(sq(Kp*Yr) + (float)1);
@@ -142,8 +142,8 @@ private:
 												// ** All Units in SI Units **
 		const float ThrshldV = 0.05;
 		
-		float V = Base.Get_V();								
-		float Wmax = Base.Get_Wmax();
+		float V = (*ptrBase).Get_V();								
+		float Wmax = (*ptrBase).Get_Wmax();
 
 		float Yexp = Y + (V*del_t)*prev_SinO;
 															
