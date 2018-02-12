@@ -115,14 +115,14 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 		}
 
 	inline float Vmax_clac() {
-			return min(M1.Vmax, M2.Vmax, M3.Vmax, M4.Vmax);
+			return min(min(M1.Vmax, M2.Vmax), min(M3.Vmax, M4.Vmax));
 		}
 	inline float Wmax_calc() {
 		return Vmax / r;
 	}
 
 	void Debug_Dev() {
-		Serial.print(Vr1); erial.print(", ");Serial.print(Vr2);Serial.print(", ");Serial.print(Vr3);Serial.print(", ");Serial.print(Vr4);Serial.print("   ");
+		Serial.print(M1.Vr); Serial.print(", ");Serial.print(M2.Vr);Serial.print(", ");Serial.print(M3.Vr);Serial.print(", ");Serial.print(M4.Vr);Serial.print("   ");
 	}
 };
 
