@@ -90,7 +90,9 @@ public:
 	{
 		JnCount = 0;
 	}
-
+	void Initialise() {
+		pinMode(JnPin, INPUT);
+	}
 	void Update() {
 		int newLinePos = analogRead(AnPin);
 		int newis_Jn = digitalRead(JnPin);

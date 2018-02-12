@@ -45,14 +45,14 @@ public:
 
 	MotorAssmbly(const MotorClass Motor, const Wheel wheel)
 		:MotorClass(Motor), Wheel(wheel),
-		 Vmax((rpm_limit / 60)*PI*d) {}
+		 Vmax((MotorClass::rpm_limit / 60)*PI*d) {}
 
 	MotorAssmbly(const MotorClass Motor, const Wheel wheel, const float Max_V)
 		:MotorClass(Motor), Wheel(wheel),
 		 Vmax(Max_V) {}
 
 	inline float Get_V() {					// Real World Velocity(Realtime)
-		return Vr*Vmax;
+		return MotorClass::Vr*Vmax;
 	}					
 };
 

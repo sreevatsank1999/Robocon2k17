@@ -18,7 +18,6 @@ public:
 	virtual int Update();
 
 	virtual int Joystick_Debug();
-protected:
 	int Debug_Dev();
 };
 
@@ -40,10 +39,10 @@ public:
 	virtual void Initialise();
 	virtual int Update();
 	virtual int Joystick_Debug();
-
-protected:
+	
 	int Debug_Dev();
 
+protected:
 	bool Read();
 	virtual void RawRead(int &X, int &Y);
 	virtual float Max_Amp();
@@ -63,7 +62,7 @@ protected:
 
 public:
 	Virtual_Joystick()
-		:ID(0), ptrParent(nullptr) {}
+		:ID(0), ptrParent(NULL) {}
 	Virtual_Joystick(const unsigned int id, ParentObj &P) 
 		:ID(id), ptrParent(&P) {}
 
@@ -82,7 +81,7 @@ public:
 		ptrParent = &P;
 	}
 	void detach_Parent() {
-		ptrParent = nullptr;
+		ptrParent = NULL;
 	}
 };
 #endif // !Joystick_h 
