@@ -143,15 +143,34 @@ public:
 		digitalWrite(13, HIGH);    // turn on Arduino's LED to indicate we are in calibration mode
 		for (int i = 0; i < 400; i++)  // make the calibration take about 10 seconds
 		{
+			Serial.println("Calibrating...");
 			(*this).calibrate(QTR_EMITTERS_ON);       // reads all sensors 10 times at 2500 us per read (i.e. ~25 ms per call)
 		}
 		digitalWrite(13, LOW);     // turn off Arduino's LED to indicate we are through with calibration
+		
+	    // print the calibration minimum values measured when emitters were on
+		for (int i = 0; i < 8; i++)
+		{
+			Serial.print((*this).calibratedMinimumOn[i]);
+			Serial.print(' ');
+		}
+		Serial.println();
+
+		// print the calibration maximum values measured when emitters were on
+		for (int i = 0; i < 8; i++)
+		{
+			Serial.print((*this).calibratedMaximumOn[i]);
+			Serial.print(' ');
+		}
+		Serial.println();
+		Serial.println();
+
 
 		delay(1000);
 	}
 
 	void Update() {
-		int newLinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
+		unsigned int newLinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
 		
 		if ((newLinePos == LinePos_Max) && (LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
 		else													 LinePos = newLinePos;

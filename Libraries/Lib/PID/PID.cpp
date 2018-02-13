@@ -94,6 +94,10 @@ public:
 		P_CosSin(newPVal, Jxy.CosO, Jxy.SinO);
 	    Set_K(Jxy.K);
 
+		Y = newPVal;
+		delY_by_delX = newdelY_by_delX;
+		Intg_Y = newIntg_Y;
+
 		now_Prev = micros();
 
 		return true;
