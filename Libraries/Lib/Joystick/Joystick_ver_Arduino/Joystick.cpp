@@ -123,8 +123,8 @@ float Joystick_Analog::Max_Amp() {     //  Max Joystick Amplitude in a Given dir
 
 	float AMax;           // AMax is a function of angle O
 
-	float AMax_β, Cosb, Sinb;							// b - AMax_x, AMax_y Diagonal Angle
-	A_Cos_Sin(AMax_X, AMax_Y, AMax_β, Cosb, Sinb);
+	float AMax_b, Cosb, Sinb;							// b - AMax_x, AMax_y Diagonal Angle
+	A_Cos_Sin(AMax_X, AMax_Y, AMax_b, Cosb, Sinb);
 
 	if ((SinO < ThrshldSin) && (CosO < ThrshldCos))   AMax = min(AMax_X, AMax_Y);
 	if (abs(SinO) < ThrshldSin)                       AMax = AMax_X;
