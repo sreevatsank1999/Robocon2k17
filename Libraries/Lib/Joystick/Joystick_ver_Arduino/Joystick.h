@@ -63,12 +63,27 @@ protected:
 public:
 	Virtual_Joystick()
 		:ID(0), ptrParent(NULL) {}
+
+	Virtual_Joystick(const float extern_K, const float extern_CosO, const float extern_SinO, const unsigned int id = 0)
+		:K(extern_K), CosO(extern_CosO), SinO(extern_SinO),
+		ID(id), ptrParent(NULL) {}
+
+	Virtual_Joystick(const float extern_K, const float extern_CosO, const float extern_SinO, const unsigned int id, ParentObj &P)
+		:K(extern_K), CosO(extern_CosO), SinO(extern_SinO),
+		 ID(id), ptrParent(&P) {}
+
 	Virtual_Joystick(const unsigned int id, ParentObj &P) 
 		:ID(id), ptrParent(&P) {}
 
 	virtual int Update() {
-		(*ptrParent).Update((*this));
+		if(ptrParent != NULL)		(*ptrParent).Update((*this));
 		return 0;
+	}
+
+	virtual int Update(const float extern_K, const float extern_CosO, const float extern_SinO) {
+		K = extern_K;
+		CosO = extern_CosO;
+		SinO = extern_SinO;
 	}
 
 	void set_ID(unsigned int &id) {
