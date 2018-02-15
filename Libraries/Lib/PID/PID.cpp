@@ -111,7 +111,6 @@ public:
 		return 0;
 	}
 
-private:
 	int Debug_Dev() {
 
 		Serial.print(Y); Serial.print(", "); Serial.print(delY_by_delX); Serial.print(", "); Serial.print(Intg_Y); Serial.print(", ");
@@ -122,8 +121,9 @@ private:
 		return 0;
 	}
 
+private:
   int Set_K(float &K) {												// TODO : Make fn. for K (Variable K) 50%-120% Range
-	  K = sqrt((float)1/(float)2);
+	  K = 1.0;			//sqrt((float)1/(float)2);
     return 0;
   }
 	int P_CosSin(float PVal, float &Cosa, float &Sina) {
@@ -154,9 +154,26 @@ private:
 		if (V < ThrshldV)			newdelY_by_delX = 0;
 		else						newdelY_by_delX = -(Yobs - Yexp) / (V*del_t);
 
-		Wr = Kd*(newdelY_by_delX / del_t)*(1 / Wmax);
+		float alpha = atan(delY_by_delX);
+		float newalpha = atan(newdelY_by_delX);		
+		float delAlpha = (newalpha - alpha);
+
+		//const double e = 2.7182818284590452353602874713527;
+		const float a = sqrt(1.5);
+		const float b = PI/8;
+					
+		float delAlpha_norm = delAlpha / b;
+
+		newalpha = alpha + (delAlpha)*(a / sqrt(sq(delAlpha_norm) + sq(a)));
+		//newalpha = alpha + (delAlpha/b)*(a*alpha / sqrt(sq(delAlpha/b) + sq(a*alpha)));		// Suppresses Impulsive signal 
+
+		Wr = Kd*(newalpha / del_t)*(1 / Wmax);
+
+		if (Wr > 1.0)	Wr = 1.0;
 
 		return 0;
+
+		// Wr = atan(Kd*(newalpha / del_t)*(1 / Wmax)) / (PI / (float)2);
 	}
 	int  I(float PVal, float del_t, float &newIntg_Y) {
 		
