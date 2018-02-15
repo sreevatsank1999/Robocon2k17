@@ -89,6 +89,7 @@ public:
 		:AnPin(AnalogPin), JnPin(JunctionPin), l(len)
 	{
 		JnCount = 0;
+		is_Jn = false;
 	}
 	void Initialise() {
 		pinMode(JnPin, INPUT);
@@ -102,6 +103,8 @@ public:
 		
 		if ((is_Jn == false) && (newis_Jn == true))			 JnCount += 1;
 		else												 JnCount += 0;
+
+		is_Jn = newis_Jn;
 	}
 
 	float PID_Inp() {
@@ -133,9 +136,16 @@ class Polulo : public QTRSensorsRC {
 public:
 	unsigned int LinePos;
 
-	Polulo(QTRSensorsRC qtrrc, const float len) : QTRSensorsRC(qtrrc), l(len)
-	{}
+	unsigned int JnCount;
+	bool is_Jn;
 
+	Polulo(unsigned char* pins, unsigned char numSensors, unsigned int timeout, unsigned char emitterPin, const float len)
+		:QTRSensorsRC(pins, numSensors, timeout, emitterPin), l(len)
+	{
+		JnCount = 0;
+		is_Jn = false;
+	}
+													// TODO: Store Values in EEPROM and Retrive
 	void Initialise() {
 
 		delay(500);
@@ -171,10 +181,19 @@ public:
 
 	void Update() {
 		unsigned int newLinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
+		int newis_Jn = Jn_Check();
 		
 		if ((newLinePos == LinePos_Max) && (LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
 		else													 LinePos = newLinePos;
 
+		if ((is_Jn == false) && (newis_Jn == true))			 JnCount += 1;
+		else												 JnCount += 0;
+
+		is_Jn = newis_Jn;	
+	}
+
+	bool Jn_Check() {
+		// ~! Complete Fn
 	}
 
 	float PID_Inp() {
