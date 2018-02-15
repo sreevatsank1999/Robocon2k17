@@ -195,7 +195,7 @@ class QTRSensorsRC : public QTRSensors
 
 
 
-  private:
+  protected:
 
     // Reads the sensor values into an array. There *MUST* be space
     // for as many values as there were sensors specified in the constructor.
