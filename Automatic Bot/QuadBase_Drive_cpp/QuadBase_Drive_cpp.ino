@@ -2,6 +2,7 @@
 #include "../../Libraries/Lib/Joystick/Joystick_ver_Arduino/Joystick.h"
 #include "../../Libraries/Lib/PID/PID.cpp"
 #include "../../Libraries/Lib/Line Follower/Line_Follower.cpp"
+#include <stddef.h>
 
 class DualLineSensor{
 
@@ -27,7 +28,7 @@ public:
 
 class QuadBaseDrive{            // C++ Square Base Drive Class
 
-    Joystick &Jxy, &Jw;
+    Joystick *Jxy, *Jw;
     
     MotorAssmbly<DC_Motor> M1, M2, M3, M4;
 
@@ -37,21 +38,45 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 	const float Wmax, W_limit_k;
 
 
-  public:									// TODO: Add procedure to Manually set Vmax
+  public:									// TODO: Add procedure to Manually set Vmax  (Done !!)+
+	  QuadBaseDrive(MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit)
+		  : Jxy(NULL), Jw(NULL), 
+		  M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
+		  r(R),
+		  Vmax(Vmax_clac()), V_limit_k(k_Limit),
+		  Wmax(Wmax_calc()), W_limit_k(k_Limit) {}
+
+	  QuadBaseDrive(MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit, const float Max_V_Real)
+		  :Jxy(NULL), Jw(NULL), 
+		   M1(M_Assmbly[0], Inv_Vmax_clac(Max_V_Real)), M2(M_Assmbly[1], Inv_Vmax_clac(Max_V_Real)),
+		   M3(M_Assmbly[2], Inv_Vmax_clac(Max_V_Real)), M4(M_Assmbly[3], Inv_Vmax_clac(Max_V_Real)),
+		  r(R),
+		  Vmax(Max_V_Real), V_limit_k(k_Limit),
+		  Wmax(Wmax_calc()), W_limit_k(k_Limit) {}
+
 	  QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit)
-		  : Jxy(xy), Jw(w),
+		  : Jxy(&xy), Jw(&w),
 		  M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
 		  r(R),
 		  Vmax(Vmax_clac()), V_limit_k(k_Limit),
 		  Wmax(Wmax_calc()), W_limit_k(k_Limit)	{}
 
-      QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float Vk_Limit, const float Wk_Limit)
-      : Jxy(xy), Jw(w),
-        M1(M_Assmbly[0]), M2(M_Assmbly[1]), M3(M_Assmbly[2]), M4(M_Assmbly[3]),
+      QuadBaseDrive(Joystick &xy, Joystick &w, MotorAssmbly<DC_Motor> M_Assmbly[4], const float R, const float k_Limit, const float Max_V_Real)
+      : Jxy(&xy), Jw(&w),
+        M1(M_Assmbly[0], Inv_Vmax_clac(Max_V_Real)), M2(M_Assmbly[1], Inv_Vmax_clac(Max_V_Real)), 
+		M3(M_Assmbly[2], Inv_Vmax_clac(Max_V_Real)), M4(M_Assmbly[3], Inv_Vmax_clac(Max_V_Real)),
 		 r(R),
-		  Vmax(Vmax_clac()), V_limit_k(Vk_Limit),
-		  Wmax(Wmax_calc()), W_limit_k(Wk_Limit){}
+		  Vmax(Max_V_Real), V_limit_k(k_Limit),
+		  Wmax(Wmax_calc()), W_limit_k(k_Limit){}
 
+	  void attach_Joystick(Joystick &xy) {
+		  Jxy = &xy;
+		  Jw = new Virtual_Joystick<QuadBaseDrive>(0.0, 0.0, 0.0);
+	  }
+	  void attach_Joystick(Joystick &xy, Joystick &w) {
+		  Jxy = &xy;
+		  Jw = &w;
+	}
 
     void Initialise(){
       M1.Initialise();
@@ -61,13 +86,13 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
     }
 
 	inline float Get_V() {								// RealWorld V
-		return abs(Jxy.K*V_limit_k)*(1 - abs(Jw.K*W_limit_k))*Vmax;
+		return abs((*Jxy).K*V_limit_k)*(1 - abs((*Jw).K*W_limit_k))*Vmax;
 	}
 	inline float Get_Vmax() {							// RealWorld Vmax
 		return Vmax*V_limit_k;
 	}
 	inline float Get_W() {								// RealWorld W
-		return abs(Jw.K*W_limit_k)*Wmax;
+		return abs((*Jw).K*W_limit_k)*Wmax;
 	}
 	inline float Get_Wmax() {							// RealWorld Wmax
 		return Wmax*W_limit_k;
@@ -75,9 +100,9 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 
 	int Read_Update() {
 		
-		Jxy.Update();
-		Jw.Update();
-		Vr_Update(Jxy.K, Jw.K, Jxy.CosO, Jxy.SinO, M1.Vr, M2.Vr, M3.Vr, M4.Vr);
+		(*Jxy).Update();
+		(*Jw).Update();
+		Vr_Update((*Jxy).K, (*Jw).K, (*Jxy).CosO, (*Jxy).SinO, M1.Vr, M2.Vr, M3.Vr, M4.Vr);
 
 		return 0;
 	}
@@ -117,6 +142,9 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 	inline float Vmax_clac() {
 			return min(min(M1.Vmax, M2.Vmax), min(M3.Vmax, M4.Vmax));
 		}
+	inline float Inv_Vmax_clac(const float Max_V) {
+		return Max_V;
+	}
 	inline float Wmax_calc() {
 		return Vmax / r;
 	}
@@ -126,14 +154,33 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 	}
 };
 
-MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 220), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 220), Wheel(0.1)),
-										MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 200), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,220,20), Wheel(0.1))};
+template<unsigned int N>
+class MasterControl {
+	
+	void(*Event_List[N])(); 
+	bool(*Trig_Fn)();
+
+public:
+	int Trig_Val;
+
+	MasterControl(unsigned int NumberOfEvents) : TotEvent_No(NumberOfEvents) {}
+
+	int Update(int newTrig_Val) {
+		
+		if (newTrig_Val == Trig_Val)		return 0;
+
+		Trig_Val = newTrig_Val;
+	}
+};
+
+MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 0.85), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 0.85), Wheel(0.1)),
+										MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 0.85), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,0.85,20), Wheel(0.1))};
 
 Cytron Cytron_LSA08(A0, 10, 0.1);
 Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron(Cytron_LSA08, 0.05, sqrt(3), 0.0, 0.05);
 
-Polulo Polulo_QTRRC(QTRSensorsRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53), 0.5);
-Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(Polulo_QTRRC, 0.025, sqrt(3), 0.0, 0.05);
+Polulo Polulo_QTRRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53, 0.5);
+Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(Polulo_QTRRC, 0.25, sqrt(3), 0.0, 0.0125);
 
 QuadBaseDrive QuadBase_Polulo(PID_Polulo.Jxy, PID_Polulo.Jw, M_Assmbly, 0.4, 1.0);
 
