@@ -65,12 +65,16 @@ public:
 		:ID(0), ptrParent(NULL) {}
 
 	Virtual_Joystick(const float extern_K, const float extern_CosO, const float extern_SinO, const unsigned int id = 0)
-		:K(extern_K), CosO(extern_CosO), SinO(extern_SinO),
-		ID(id), ptrParent(NULL) {}
+		:ID(id), ptrParent(NULL) 
+	{
+		K = extern_K; CosO = extern_CosO; SinO = extern_SinO;
+	}
 
 	Virtual_Joystick(const float extern_K, const float extern_CosO, const float extern_SinO, const unsigned int id, ParentObj &P)
-		:K(extern_K), CosO(extern_CosO), SinO(extern_SinO),
-		 ID(id), ptrParent(&P) {}
+		:ID(id), ptrParent(&P) 
+	{
+		K = extern_K; CosO = extern_CosO; SinO = extern_SinO;
+	}
 
 	Virtual_Joystick(const unsigned int id, ParentObj &P) 
 		:ID(id), ptrParent(&P) {}
@@ -97,6 +101,39 @@ public:
 	}
 	void detach_Parent() {
 		ptrParent = NULL;
+	}
+};
+
+template <> class Virtual_Joystick<void> : public Joystick {
+protected:
+	unsigned int ID;
+
+public:
+	Virtual_Joystick()
+		:ID(0) {}
+
+	Virtual_Joystick(const unsigned int id, const float extern_K = 0.0, const float extern_CosO = 0.0, const float extern_SinO = 0.0)
+		:ID(id)
+	{
+		K = extern_K; CosO = extern_CosO; SinO = extern_SinO;
+	}
+
+	virtual int Update() {
+								// Do Nothing !!
+		return 0;
+	}
+
+	virtual int Update(const float extern_K, const float extern_CosO, const float extern_SinO) {
+		K = extern_K;
+		CosO = extern_CosO;
+		SinO = extern_SinO;
+	}
+
+	void set_ID(unsigned int &id) {
+		ID = id;
+	}
+	inline unsigned  int get_ID() {
+		return ID;
 	}
 };
 #endif // !Joystick_h 
