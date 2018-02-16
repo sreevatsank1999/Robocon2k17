@@ -71,12 +71,16 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 
 	  void attach_Joystick(Joystick &xy) {
 		  Jxy = &xy;
-		  Jw = new Virtual_Joystick<QuadBaseDrive>(0.0, 0.0, 0.0);
+		  Jw = new Virtual_Joystick<void>(0.0, 0.0, 0.0);
 	  }
 	  void attach_Joystick(Joystick &xy, Joystick &w) {
 		  Jxy = &xy;
 		  Jw = &w;
 	}
+	  void detach_Joystick() {
+		  Jxy = new Virtual_Joystick<void>(0.0, 0.0, 0.0);
+		  Jw = new Virtual_Joystick<void>(0.0, 0.0, 0.0);
+	  }
 
     void Initialise(){
       M1.Initialise();
@@ -155,69 +159,147 @@ class QuadBaseDrive{            // C++ Square Base Drive Class
 };
 
 template<unsigned int N>
-class MasterControl {
+class MasterController {
 	
-	void(*Event_List[N])(); 
-	bool(*Trig_Fn)();
+	int(*Event[N])(); 
+	bool(*Trig[N])();
 
+	int i;
+
+	bool is_enabled;
 public:
-	int Trig_Val;
+	MasterController()
+		: i(0), is_enabled(true) {}
+	MasterController(int(*arrEvent[N])(), bool(*arrTrig_Fn[N])(), const int Start_E = 0)
+		:Event(arrEvent), Trig(arrTrig_Fn),
+		  i(0), is_enabled(true)  {}
 
-	MasterControl(unsigned int NumberOfEvents) : TotEvent_No(NumberOfEvents) {}
+	void attach_Evnt_Trig(int(*arrEvent[N])(), bool(*arrTrig_Fn[N])()) {
+		Event = arrEvent;
+		Trig = arrTrig_Fn;
+	}
 
-	int Update(int newTrig_Val) {
+	int Update() {
 		
-		if (newTrig_Val == Trig_Val)		return 0;
+		if (is_enabled == false)			return -1;
 
-		Trig_Val = newTrig_Val;
+		bool blnTriggered = Trig[i]();
+		if (blnTriggered == true) {
+			int jmp_to_i = Event[i]();
+			if (jmp_to_i == 0)		i++;
+			else					i = jmp_to_i;
+		}
+
+		if (i > N - 1)		is_enabled = false;
+
+		return i;
 	}
 };
 
-MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(5, 28, 300, 0.85), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(2,22, 300, 0.85), Wheel(0.1)),
-										MotorAssmbly<DC_Motor>(DC_Motor(3,24, 300, 0.85), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(4,26,300,0.85,20), Wheel(0.1))};
 
-Cytron Cytron_LSA08(A0, 10, 0.1);
-Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron(Cytron_LSA08, 0.05, sqrt(3), 0.0, 0.05);
+MotorAssmbly<DC_Motor> M_Assmbly[4] = { MotorAssmbly<DC_Motor>(DC_Motor(8, 7, 100, 1), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(10, 9, 100, 1), Wheel(0.1)),
+MotorAssmbly<DC_Motor>(DC_Motor(6, 5, 100, 1), Wheel(0.1)), MotorAssmbly<DC_Motor>(DC_Motor(12, 11, 100, 1), Wheel(0.1)) };
 
-Polulo Polulo_QTRRC((unsigned char[8]){ 37, 39, 41, 43, 45, 47, 49, 51 }, 8, 2500, 53, 0.5);
-Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(Polulo_QTRRC, 0.25, sqrt(3), 0.0, 0.0125);
+//Polulo Polulo_QTRRC((unsigned char[8]){5,6,7,8,9,10,11,12}, 8, 2500, 4, 0.5);
+///Joystick_PID<Polulo, QuadBaseDrive> PID_Polulo(0.25, sqrt(3), 0.0, 0.025);
 
-QuadBaseDrive QuadBase_Polulo(PID_Polulo.Jxy, PID_Polulo.Jw, M_Assmbly, 0.4, 1.0);
+//QuadBaseDrive QuadBase_Polulo(M_Assmbly, 0.4, 1.0);
 
-QuadBaseDrive QuadBase_Cytron(PID_Cytron.Jxy, PID_Cytron.Jw, M_Assmbly, 0.4, 1.0);
+Cytron Cytron_LSA08(A0, 20, 0.1);
+Joystick_PID<Cytron, QuadBaseDrive> PID_Cytron(0.05, sqrt(3), 0.0, 0.0125);
 
+Virtual_Joystick<void> VJxy(0, 0.0, 1.0, 0.0), VJw(1, 0.0, 0.0, 0.0);
+Virtual_Joystick<void> VJk_pid(2, 1.0, 1.0, 0.0);
+
+//QuadBaseDrive QuadBase_Cytron(VJxy, VJw, M_Assmbly, 0.4, 1.0);
+
+QuadBaseDrive QuadBase_Cytron(M_Assmbly, 0.4, 1.0);
+
+MasterController<7> Automatic_Bot_Brain;
+
+int(*arrEvent[7])() = { E0, E1, E2, E3, E4, E5, E6 };
+bool(*arrTrig_Fn[7])() = { T0, T1, T2, T3, T4, T5, T6 };
 
 void setup() {
-  
- Serial.begin(57600);
 
- Cytron_LSA08.Initialise();
- PID_Cytron.attach_Vehicle(QuadBase_Cytron);
- PID_Cytron.Initialise();
+	Serial.begin(57600);
 
- Polulo_QTRRC.Initialise();
- PID_Polulo.attach_Vehicle(QuadBase_Polulo);
- PID_Polulo.Initialise();
+	// Polulo_QTRRC.Initialise();
+	// PID_Polulo.attach(Polulo_QTRRC, QuadBase_Polulo, VJk_pid);
+	// PID_Polulo.Initialise();
 
-QuadBase_Polulo.Initialise();
-QuadBase_Cytron.Initialise();
+	// QuadBase_Polulo.attach_Joystick(PID_Polulo.Jxy, PID_Polulo.Jw);
+	//QuadBase_Polulo.Initialise();
 
-  delay(1000);
+
+	Cytron_LSA08.Initialise();
+	PID_Cytron.attach(Cytron_LSA08, QuadBase_Cytron, VJk_pid);
+	PID_Cytron.Initialise();
+
+	QuadBase_Cytron.attach_Joystick(PID_Cytron.Jxy, PID_Cytron.Jw);
+	QuadBase_Cytron.Initialise();
+
+	Automatic_Bot_Brain.attach_Evnt_Trig(arrEvent, arrTrig_Fn);
+
+	delay(3000);
 }
 void loop() {
- 
- PID_Cytron.Update();
- PID_Cytron.Joystick_Debug();
 
-  PID_Polulo.Update();
-  PID_Polulo.Joystick_Debug();
+	// Cytron_LSA08.Update();
+	// Cytron_LSA08.Debug();
 
-/*
-QuadBase_Cytron.Read_Drive();
-  delay(20);
-  
-QuadBase_Polulo.Read_Drive();
-  delay(20);
-*/
-  delay(250);
+	// PID_Cytron.Update();
+	// PID_Cytron.Joystick_Debug();
+
+	//  PID_Polulo.Update();
+	//  PID_Polulo.Joystick_Debug();
+
+
+	QuadBase_Cytron.Read_Drive();
+	//QuadBase_Cytron.Read_Update();
+	//QuadBase_Cytron.Debug();
+
+	//QuadBase_Polulo.Read_Drive();
+
+	Automatic_Bot_Brain.Update();
+
+	delay(20);
 }
+
+
+/////////////////////////////////////////////////////////*********Trig And Event**********////////////////////////////////////////////////////////////////////////////////////////////////
+
+//**********************Important Fns********************************//
+
+int Do_Nothing() { return 0; }
+bool No_Trig() { return true; }
+
+template <class LineFollower>
+bool Jn_Trig(LineFollower &Obj) {
+	static unsigned int oldJnCount = 0;
+
+	if (Obj.JnCount = (oldJnCount + 1)) { oldJnCount = Obj.JnCount; return true; }
+	else					return false;
+}
+
+void Rotate_Set(QuadBaseDrive &A, const float Wr) {
+	VJxy.Update(0.0, 1.0, 0.0); VJw.Update(Wr, 0.0, 0.0);
+	A.attach_Joystick(VJxy, VJw);
+}
+
+//**********************Trig And Event Fns*************************//
+
+bool T0() { return No_Trig(); }
+int  E0() { return Do_Nothing(); }
+bool T1() { return Jn_Trig<Cytron>(Cytron_LSA08); }
+int  E1() { PID_Cytron.disable();  Rotate_Set(QuadBase_Cytron, 0.85); return 0; }
+bool T2() { return Jn_Trig<Cytron>(Cytron_LSA08);}
+int  E2() { PID_Cytron.Initialise(); QuadBase_Cytron.attach_Joystick(PID_Cytron.Jxy, PID_Cytron.Jw); VJk_pid.Update(+1.0, 1.0, 0.0); return 0; }
+bool T3() { return Jn_Trig<Cytron>(Cytron_LSA08);}
+int  E3() { return Do_Nothing(); }
+bool T4() { return Jn_Trig<Cytron>(Cytron_LSA08); }
+int  E4() { PID_Cytron.disable();  Rotate_Set(QuadBase_Cytron, 0.85); return 0; }
+bool T5() { return Jn_Trig<Cytron>(Cytron_LSA08); }
+int  E5() { PID_Cytron.Initialise(); QuadBase_Cytron.attach_Joystick(PID_Cytron.Jxy, PID_Cytron.Jw); VJk_pid.Update(+1.0, 1.0, 0.0); return 0; }
+bool T6() { return Jn_Trig<Cytron>(Cytron_LSA08); }
+int  E6() { QuadBase_Cytron.detach_Joystick(); return 0; }
