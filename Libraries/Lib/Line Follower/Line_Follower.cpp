@@ -98,7 +98,7 @@ public:
 		int newLinePos = analogRead(AnPin);
 		int newis_Jn = digitalRead(JnPin);
 
-		if ((newLinePos == LinePos_Max)&&(LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
+		if ((newLinePos >= LinePos_Max)&&(LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
 		else												 LinePos = newLinePos;
 		
 		if ((is_Jn == false) && (newis_Jn == true))			 JnCount += 1;
@@ -183,7 +183,7 @@ public:
 		unsigned int newLinePos = (*this).readLine(sensorValues, QTR_EMITTERS_ON, 0);
 		int newis_Jn = Jn_Check();
 		
-		if ((newLinePos == LinePos_Max) && (LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
+		if ((newLinePos >= LinePos_Max) && (LinePos < 0.15*LinePos_Max))	 LinePos = 0;				// 15% of LinePos_Max ;
 		else													 LinePos = newLinePos;
 
 		if ((is_Jn == false) && (newis_Jn == true))			 JnCount += 1;
