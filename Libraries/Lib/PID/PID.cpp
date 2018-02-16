@@ -13,45 +13,53 @@ class Joystick_PID {
 	float Intg_Y, delY_by_delX;
 
 	unsigned long now_Prev;
+
+	bool is_enabled;
 public:
 
 	Virtual_Joystick<Joystick_PID> Jxy, Jw;
+
+	Joystick *ptrJkSet;
 	
-	Joystick_PID(PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
+	Joystick_PID(float zeroVal, float p, float i, float d)
 		: Jxy(0, (*this)), Jw(1, (*this)),
-			ptrBase(&base_Obj),
-			Kp(p), Ki(i), Kd(d),
-			Yo(zeroVal)
+		Kp(p), Ki(i), Kd(d),
+		Yo(zeroVal)
 	{
 		Y = 0.0;
 		Intg_Y = 0.0;
 		delY_by_delX = 0.0;
+		is_enabled = false;
 	}
-	Joystick_PID(PIDObj &pid_Obj, float zeroVal, float p, float i, float d)
-		: Jxy(0, (*this)), Jw(1, (*this)),
-			ptrPID_Obj(&pid_Obj),
-			Kp(p), Ki(i), Kd(d),
-			Yo(zeroVal)
-	{
-		Y = 0.0;
-		Intg_Y = 0.0;
-		delY_by_delX = 0.0;
-	}
-  Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, float zeroVal, float p, float i, float d)
+  Joystick_PID(PIDObj &pid_Obj, PIDVehicle &base_Obj, Joystick &K_stick, float zeroVal, float p, float i, float d)
     : Jxy(0, (*this)), Jw(1, (*this)),
-	  ptrPID_Obj(&pid_Obj), ptrBase(&base_Obj),
+	  ptrPID_Obj(&pid_Obj), ptrBase(&base_Obj), ptrJkSet(&K_stick),
       Kp(p), Ki(i), Kd(d),
         Yo(zeroVal)
   {
     Y = 0.0;
     Intg_Y = 0.0;
     delY_by_delX = 0.0;
+	is_enabled = false;
   }
   void attach_Obj(PIDObj &pid_Obj) {
 	  ptrPID_Obj = &pid_Obj;
   }
   void attach_Vehicle(PIDVehicle &base_Obj) {
 	  ptrBase = &base_Obj;
+  }
+  void attach_JkSet(Joystick &K_set) {
+	  ptrJkSet = &K_set
+  }
+  void attach(PIDObj &pid_Obj, PIDVehicle &base_Obj) {
+	  attach_Obj(pid_Obj);
+	  attach_Vehicle(base_Obj);
+	  ptrJkSet = new Virtual_Joystick<void>(1.0, 1.0, 0.0);
+  }
+  void attach(PIDObj &pid_Obj, PIDVehicle &base_Obj, Joystick &K_set) {
+	  attach_Obj(pid_Obj);
+	  attach_Vehicle(base_Obj);
+	  attach_JkSet(K_set);
   }
 
 	void Initialise() {
@@ -62,8 +70,17 @@ public:
 		Intg_Y = 0.0;
 		delY_by_delX = 0.0;
 
+		is_enabled = true;
 		now_Prev = micros();
 	}
+	void disable() {
+
+		is_enabled = false;
+		Y = 0.0;
+		Intg_Y = 0.0;
+		delY_by_delX = 0.0;
+	}
+
 	int Update() {
 		return Update(Jxy);
 	}
@@ -72,6 +89,7 @@ public:
 		if (J_caller.get_ID() == 1)		return 1;					// Don't Update if Jw.Update() is called
 
 		(*ptrPID_Obj).Update();
+		(*ptrJkSet).Update();
 
 		float newPVal = (*ptrPID_Obj).PID_Inp() - Yo;
 		Update(newPVal);
@@ -85,6 +103,8 @@ public:
 	}
 	int Update(float newPVal, float del_t) {
 		
+		if (is_enabled == false)			return false;
+
 		float newIntg_Y;
 		I(newPVal, del_t, newIntg_Y);
 
@@ -123,7 +143,7 @@ public:
 
 private:
   int Set_K(float &K) {												// TODO : Make fn. for K (Variable K) 50%-120% Range
-	  K = 1.0;			//sqrt((float)1/(float)2);
+	  K = (*ptrJkSet).K;
     return 0;
   }
 	int P_CosSin(float PVal, float &Cosa, float &Sina) {
@@ -167,7 +187,7 @@ private:
 		newalpha = alpha + (delAlpha)*(a / sqrt(sq(delAlpha_norm) + sq(a)));
 		//newalpha = alpha + (delAlpha/b)*(a*alpha / sqrt(sq(delAlpha/b) + sq(a*alpha)));		// Suppresses Impulsive signal 
 
-		Wr = Kd*(newalpha / del_t)*(1 / Wmax);
+		Wr = Kd*(-newalpha / del_t)*(1 / Wmax);
 
 		if (Wr > 1.0)	Wr = 1.0;
 
