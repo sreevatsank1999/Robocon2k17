@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-class Joystick {                      // C++ Joystick Class  // Joystick(Axis_x, Axis_y = -1, Threshold_x = 50, Threshold_y = 50, Max_x = 512, Max_y = 512);
+class Joystick {                      // C++ Joystick Class 
 public:
 	float K;
 	float CosO;
@@ -21,11 +21,13 @@ public:
 	int Debug_Dev();
 };
 
-class Joystick_Analog : public Joystick {
+// Joystick Axis ID Flags
+					const unsigned char J_x_Slct = 0x01;
+					const unsigned char J_y_Slct = 0x02;
+
+class Joystick_Sqr : public Joystick {				 // Joystick(x_pin, y_pin = -1, Threshold_x = 50, Threshold_y = 50, Max_x = 512, Max_y = 512);
 protected:
 	int JVal_X, JVal_Y; float A;
-
-	const int Jx, Jy;
 
 	int OffstX, OffstY;
 
@@ -33,8 +35,11 @@ protected:
 
 	const int ThrshldX, ThrshldY;
 
+	const unsigned char xy_Slct;
+
 public:
-	Joystick_Analog(const int Axis_x, const int Axis_y = -1, const int Threshold_x = 50, const int Threshold_y = 50, const int Max_x = 512, const int Max_y = 512);
+	Joystick_Sqr(const int Threshold_x, const int Threshold_y, const int Max_x, const int Max_y);
+	Joystick_Sqr(const int Threshold, const int Max_Val, unsigned char Axis_Sel);
 
 	virtual void Initialise();
 	virtual int Update();
@@ -45,7 +50,7 @@ public:
 protected:
 	bool Read();
 	virtual void RawRead(int &X, int &Y);
-	virtual float Max_Amp();
+	float Max_Amp();
 	float Kfactor(float AMax);
 
 	int A_Cos_Sin();
@@ -53,6 +58,16 @@ protected:
 };
 
 //  ** Template Section **  //
+
+class JSqr_real : public Joystick_Sqr {
+private:
+	const int Jx, Jy;
+public:
+	JSqr_real(const int x_pin, const int y_pin, const int Threshold_x, const int Threshold_y, const int Max_x, const int Max_y);
+	JSqr_real(const int pin, const int Threshold, const int Max_Val, unsigned char Axis_Sel);
+private:
+	void RawRead(int &X, int &Y);
+};
 
 template <class ParentObj>
 class Virtual_Joystick : public Joystick {
