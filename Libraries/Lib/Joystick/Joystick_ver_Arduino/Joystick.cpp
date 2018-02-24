@@ -130,6 +130,10 @@ float Joystick_Sqr::Kfactor(float AMax) {     // Kfactor - Amplitude factor
 
 	return K;
 }
+void Joystick_Sqr::RawRead(int &X, int &Y) {			// Jx(or)Jy = -1 => Axis Disabled hence No read
+	X = OffstX;
+	Y = OffstY;
+}
 
 int Joystick_Sqr::A_Cos_Sin() {                 // Set Amplitude(A),CosO,SinO Values
 
@@ -153,7 +157,7 @@ int Joystick_Sqr::A_Cos_Sin(int X, int Y, float &Amp, float &Cosa, float &Sina) 
 
 JSqr_real::JSqr_real(const int Axis_x, const int Axis_y, const int Threshold_x, const int Threshold_y, const int Max_x, const int Max_y)
 	: Jx(Axis_x), Jy(Axis_y),
-	  Joystick_Sqr(Threshold_x, Threshold_y, Max_x, Max_y, (J_x_Slct + J_y_Slct))		{}
+	  Joystick_Sqr(Threshold_x, Threshold_y, Max_x, Max_y)		{}
 
 JSqr_real::JSqr_real(const int pin, const int Threshold, const int Max_Val, unsigned char Axis_Sel)
 	: Jx((Axis_Sel&J_x_Slct) ? pin : -1), Jy((Axis_Sel&J_y_Slct) ? pin : -1),
