@@ -49,7 +49,7 @@ public:
 	  ptrBase = &base_Obj;
   }
   void attach_JkSet(Joystick &K_set) {
-	  ptrJkSet = &K_set
+	  ptrJkSet = &K_set;
   }
   void attach(PIDObj &pid_Obj, PIDVehicle &base_Obj) {
 	  attach_Obj(pid_Obj);
