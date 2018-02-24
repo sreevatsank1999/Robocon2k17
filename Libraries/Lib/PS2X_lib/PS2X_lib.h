@@ -182,7 +182,7 @@ class PS2X {
     byte Analog(byte);
     void reconfig_gamepad();
 
-  private:
+  protected:
     inline void CLK_SET(void);
     inline void CLK_CLR(void);
     inline void CMD_SET(void);

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Lib\DC_Motor\DC_Motor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Lib\Joystick\Joystick_ver_Arduino\Joystick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,11 +39,14 @@
     <ClCompile Include="Lib\QTRSensors\QTRSensors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Lib\PS2X_lib\PS2X_lib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lib\Motor\Motor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Lib\DC_Motor\DC_Motor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Lib\Joystick\Joystick_ver_Arduino\Joystick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,6 +63,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Lib\QTRSensors\QTRSensors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\PS2X_lib\PS2X_lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\Motor\Motor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

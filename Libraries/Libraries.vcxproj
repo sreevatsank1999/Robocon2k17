@@ -110,22 +110,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Lib\DC_Motor\DC_Motor.cpp" />
+    <ClCompile Include="Lib\Motor\Motor.cpp" />
     <ClCompile Include="Lib\Joystick\Joystick.cpp" />
     <ClCompile Include="Lib\Joystick\Joystick_ver_Arduino\Joystick.cpp" />
     <ClCompile Include="Lib\Line Follower\Line_Follower.cpp" />
     <ClCompile Include="Lib\PID\PID.cpp" />
     <ClCompile Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_lib.cpp" />
     <ClCompile Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\PS2X_lib.cpp" />
+    <ClCompile Include="Lib\PS2X_lib\PS2X_lib.cpp" />
     <ClCompile Include="Lib\QTRSensors\QTRSensors.cpp" />
     <ClCompile Include="Lib\SoftwareServo\SoftwareServo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Lib\DC_Motor\DC_Motor.h" />
+    <ClInclude Include="Lib\Motor\Motor.h" />
     <ClInclude Include="Lib\Joystick\Joystick.h" />
     <ClInclude Include="Lib\Joystick\Joystick_ver_Arduino\Joystick.h" />
     <ClInclude Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\examples\PS2X_Example\PS2X_lib.h" />
     <ClInclude Include="Lib\PS2X-Arduino-Complete-Odin\Arduino-PS2X-master\PS2X_lib\PS2X_lib.h" />
+    <ClInclude Include="Lib\PS2X_lib\PS2X_lib.h" />
     <ClInclude Include="Lib\QTRSensors\QTRSensors.h" />
     <ClInclude Include="Lib\SoftwareServo\SoftwareServo.h" />
   </ItemGroup>

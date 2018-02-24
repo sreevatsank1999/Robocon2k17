@@ -6,7 +6,7 @@
 
 class SoftwareServo
 {
-  private:
+  protected:
     uint8_t pin;
     uint8_t angle;       // in degrees
     uint16_t pulse0;     // pulse width in TCNT0 counts
