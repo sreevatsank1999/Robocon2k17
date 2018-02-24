@@ -1,7 +1,8 @@
-#ifndef DC_Motor_h
-#define DC_Motor_h
+#ifndef Motor_h
+#define Motor_h
 
 #include <Arduino.h>
+#include <Servo.h>
 
 class DC_Motor {                      // C++ DC_Motor Class    // M(PWM_pin, DIR_pin, Rated_RPM, rpm_limit_k = 1.0, pwm_Bias=0);
 
@@ -35,6 +36,61 @@ public:
 
 	Wheel(const float Diameter = 0.0);
 };
+
+
+class MyServo : public Servo {
+	const unsigned char PinNo;
+
+	const float Wmax, W_limit_k;			// Wmax = PI/sec;
+
+	const unsigned int alpha0, alpha_min, alpha_max;
+
+	unsigned long LastDriven;
+
+	bool is_enabled;
+public:
+	float Wr;
+	unsigned int alpha;
+
+	MyServo(const unsigned char Num, const int Ini_alpha, const int Min_alpha, const int Max_alpha, const float k_limit, const float max_W);
+
+	void Initialize();
+
+	void Drive();
+
+	bool isenabled();
+private:
+	int Drive(const float del_t);
+};
+
+class Stepper {
+	const int StepPin;
+	const int DirPin;
+
+	const float StepResolution;				// deg/step
+
+	const float Wmin, Wmax, W_limit_k;			// Wmax = PI/sec 
+
+	unsigned long LastDriven;
+public:
+	float Wr;
+	long stepCount;
+
+	Stepper(int Pin_step, int Pin_dir, float resolution, int PulseWidth_min, int PulseWidth_max, float k_limit);
+
+	void Initialise();
+
+	void Drive();
+
+	float Get_W();
+
+private:
+	int W_to_PulseWidth_calc(float W);
+	float PulseWidth_to_W_calc(const int PulseWidth);
+
+	void Drive(const float del_t);
+};
+
 
 //  ** Template Section **  //
 
