@@ -54,11 +54,13 @@ public:
 
 	MyServo(const unsigned char Num, const int Ini_alpha, const int Min_alpha, const int Max_alpha, const float k_limit, const float max_W);
 
-	void Initialize();
+	void Initialise();
 
 	void Drive();
 
 	bool isenabled();
+
+	int Debug();
 private:
 	int Drive(const float del_t);
 };
@@ -83,6 +85,8 @@ public:
 	void Drive();
 
 	float Get_W();
+
+	int Debug();
 
 private:
 	int W_to_PulseWidth_calc(float W);
@@ -116,4 +120,4 @@ public:
 	}					
 };
 
-#endif // !DC_Motor_h
+#endif // !Motor_h
