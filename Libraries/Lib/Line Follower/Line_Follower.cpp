@@ -78,8 +78,10 @@ class Cytron {
 	const unsigned char JnPin;
 
 	const float l;					//Module Total length in any Units
-	static const float LinePos_Max = 700;
+
 public:
+	static const float LinePos_Max = 700;
+
 	unsigned int LinePos;
 
 	unsigned int JnCount;
@@ -132,8 +134,10 @@ class Polulo : public QTRSensorsRC {
 
 	const float l;
 	unsigned int sensorValues[8];
-	static const float LinePos_Max = 7000;
+
 public:
+	static const float LinePos_Max = 7000;
+
 	unsigned int LinePos;
 
 	unsigned int JnCount;
