@@ -112,7 +112,7 @@ public:
 		D_Wr(newPVal, del_t, Jxy.SinO, Jw.K, newdelY_by_delX);
 
 		P_CosSin(newPVal, Jxy.CosO, Jxy.SinO);
-	    Set_K(Jxy.K);
+	    Set_K(Jxy.K, Jxy.CosO, Jxy.SinO, Jw.K);
 
 		Y = newPVal;
 		delY_by_delX = newdelY_by_delX;
@@ -142,8 +142,10 @@ public:
 	}
 
 private:
-  int Set_K(float &K) {												// TODO : Make fn. for K (Variable K) 50%-120% Range
-	  K = (*ptrJkSet).K;
+	int Set_K(float &K, float &Cosa, float &Sina, float &Wr) {                       // TODO : Make fn. for K (Variable K) 50%-120% Range
+		K = (*ptrJkSet).K;
+		Cosa = (abs(K) / K) * Cosa;
+		Wr = (abs(K) / K) * Wr;
     return 0;
   }
 	int P_CosSin(float PVal, float &Cosa, float &Sina) {
